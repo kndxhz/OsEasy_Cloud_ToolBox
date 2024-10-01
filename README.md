@@ -19,6 +19,6 @@
 # 免责声明
 本程序仅用于学习交流，请勿用于非法用途，作者不承担任何责任
 # 致谢
-- [OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)为本程序提供了最核心的接噢易功能，真的特别感谢 @ZiHaoSaMa66 ，因为自己懒得再写一套就直接用现成的了
+- [OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)为本程序提供了最核心的解噢易功能，真的特别感谢 @ZiHaoSaMa66 ，因为自己懒得再写一套就直接用现成的了
 # 协议
 GPL V3
