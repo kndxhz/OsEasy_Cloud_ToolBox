@@ -76,7 +76,7 @@ namespace Let_s_happy
 
             }
             // 通过进程名获取所有匹配的进程
-            Process[] processes = Process.GetProcessesByName("Student");
+            Process[] processes = Process.GetProcessesByName("StudentMain");
             string pid = "";
             if (processes.Length > 0)
             {
@@ -89,6 +89,7 @@ namespace Let_s_happy
             else
             {
                 MessageBox.Show("未找到极域进程");
+                return;
             }
             // 定义要执行的命令和参数
             string command = "ntsd.exe"; // 替换为要执行的命令
