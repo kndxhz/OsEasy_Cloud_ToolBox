@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Let's happy", "Let's happy\Let's happy.csproj", "{C7A2C5EA-A39B-4DF4-AC4E-788AD403B4DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Let's happy", "Let's happy\Let's happy.csproj", "{C7A2C5EA-A39B-4DF4-AC4E-788AD403B4DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sethc", "sethc\sethc.csproj", "{8450BD0C-4009-4206-AC25-F23F7877953D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C7A2C5EA-A39B-4DF4-AC4E-788AD403B4DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7A2C5EA-A39B-4DF4-AC4E-788AD403B4DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7A2C5EA-A39B-4DF4-AC4E-788AD403B4DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8450BD0C-4009-4206-AC25-F23F7877953D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8450BD0C-4009-4206-AC25-F23F7877953D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8450BD0C-4009-4206-AC25-F23F7877953D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8450BD0C-4009-4206-AC25-F23F7877953D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -35,7 +35,8 @@ namespace Let_s_happy
                 WindowsPrincipal principal = new WindowsPrincipal(identity);
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
-            if (IsRunningAsAdministrator() == false){
+            if (IsRunningAsAdministrator() == false)
+            {
                 MessageBox.Show("请以管理员身份运行本程序");
                 Application.Exit();
             }
@@ -117,5 +118,9 @@ namespace Let_s_happy
             }
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

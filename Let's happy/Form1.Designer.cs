@@ -32,6 +32,7 @@
             label1 = new Label();
             timer1 = new System.Windows.Forms.Timer(components);
             button1 = new Button();
+            button2 = new Button();
             SuspendLayout();
             // 
             // label1
@@ -52,6 +53,7 @@
             // 
             // button1
             // 
+            button1.Font = new Font("Microsoft YaHei UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point, 134);
             button1.Location = new Point(13, 32);
             button1.Name = "button1";
             button1.Size = new Size(129, 50);
@@ -60,11 +62,23 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // button2
+            // 
+            button2.Font = new Font("Microsoft YaHei UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            button2.Location = new Point(13, 88);
+            button2.Name = "button2";
+            button2.Size = new Size(129, 50);
+            button2.TabIndex = 2;
+            button2.Text = "替换粘滞键";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(618, 450);
+            Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(label1);
             Name = "Form1";
@@ -79,5 +93,6 @@
         private Label label1;
         private System.Windows.Forms.Timer timer1;
         private Button button1;
+        private Button button2;
     }
 }
