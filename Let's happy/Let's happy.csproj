@@ -12,10 +12,12 @@
 
   <ItemGroup>
     <None Remove="Resources\ntsd.exe" />
+    <None Remove="Resources\sethc.exe" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\ntsd.exe" />
+    <EmbeddedResource Include="Resources\sethc.exe" />
   </ItemGroup>
 
   <ItemGroup>

@@ -120,6 +120,45 @@ namespace Let_s_happy
 
         private void button2_Click(object sender, EventArgs e)
         {
+            // 获取应用程序的运行目录
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string outputPath = Path.Combine(appDirectory, "sethc.exe");
+            using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Let_s_happy.Resources.sethc.exe"))
+            {
+                if (resourceStream != null)
+                {
+                    using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = "C:\\Windows\\System32",
+                    Verb = "runas", // 以管理员身份运行
+                    UseShellExecute = true,
+                    CreateNoWindow = true
+                };
+
+                try
+                {
+                    Process.Start(processInfo);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error: {ex.Message}");
+                }
+
+                MessageBox.Show("已释放，请手动替换");
+
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
 
         }
     }

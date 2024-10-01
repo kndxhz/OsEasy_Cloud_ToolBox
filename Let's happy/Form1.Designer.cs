@@ -33,6 +33,7 @@
             timer1 = new System.Windows.Forms.Timer(components);
             button1 = new Button();
             button2 = new Button();
+            button3 = new Button();
             SuspendLayout();
             // 
             // label1
@@ -69,15 +70,27 @@
             button2.Name = "button2";
             button2.Size = new Size(129, 50);
             button2.TabIndex = 2;
-            button2.Text = "替换粘滞键";
+            button2.Text = "替换极域粘滞键";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
+            // 
+            // button3
+            // 
+            button3.Font = new Font("Microsoft YaHei UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            button3.Location = new Point(13, 144);
+            button3.Name = "button3";
+            button3.Size = new Size(129, 50);
+            button3.TabIndex = 3;
+            button3.Text = "释放极域控屏逃课bat";
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(618, 450);
+            Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(label1);
@@ -94,5 +107,6 @@
         private System.Windows.Forms.Timer timer1;
         private Button button1;
         private Button button2;
+        private Button button3;
     }
 }
