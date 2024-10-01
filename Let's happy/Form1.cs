@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
+using System.Security.Principal;
 
 namespace Let_s_happy
 {
@@ -28,6 +29,16 @@ namespace Let_s_happy
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
             timer1.Start(); // 启动计时器
+            static bool IsRunningAsAdministrator()
+            {
+                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            if (IsRunningAsAdministrator() == false){
+                MessageBox.Show("请以管理员身份运行本程序");
+                Application.Exit();
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -65,18 +76,43 @@ namespace Let_s_happy
 
             }
             // 通过进程名获取所有匹配的进程
-            Process[] processes = Process.GetProcessesByName("StudentMain.exe");
-
+            Process[] processes = Process.GetProcessesByName("Student");
+            string pid = "";
             if (processes.Length > 0)
             {
                 foreach (Process process in processes)
                 {
-                    Console.WriteLine($"进程名: {process.ProcessName}, PID: {process.Id}");
+                    MessageBox.Show($"进程名: {process.ProcessName}, PID: {process.Id}");
+                    pid = process.Id.ToString();
                 }
             }
             else
             {
-                Console.WriteLine("未找到指定进程");
+                MessageBox.Show("未找到极域进程");
+            }
+            // 定义要执行的命令和参数
+            string command = "ntsd.exe"; // 替换为要执行的命令
+            string arguments = $"-c q -p {pid}"; // 替换为命令的参数
+
+            // 创建一个新的进程
+            ProcessStartInfo processStartInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe", // 使用 cmd.exe 执行命令
+                Arguments = $"/c {command} {arguments}", // /c 参数表示在执行完命令后关闭命令窗口
+                UseShellExecute = true, // 使用系统外壳程序启动
+                Verb = "runas", // 以管理员身份运行
+                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory // 设置当前工作目录为程序运行目录
+            };
+
+            try
+            {
+                // 启动进程
+                Process process = Process.Start(processStartInfo);
+                process.WaitForExit(); // 等待命令执行完成
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"发生错误: {ex.Message}");
             }
         }
 
