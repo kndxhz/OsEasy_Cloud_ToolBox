@@ -58,6 +58,7 @@
             button1.TabIndex = 1;
             button1.Text = "杀极域（Flash）";
             button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // Form1
             // 

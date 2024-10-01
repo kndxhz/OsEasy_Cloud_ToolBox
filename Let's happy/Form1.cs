@@ -1,14 +1,16 @@
 using System;
-using System.Windows.Forms;
+using System.IO;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace Let_s_happy
 {
     public partial class Form1 : Form
     {
         // 创建全局变量
-        string[] one_sentence = { "欢迎来到工业学校！", 
-            "学习要注意劳逸结合", 
-            "请确保你已经会了上课的内容再使用本软件", 
+        string[] one_sentence = { "欢迎来到工业学校！",
+            "学习要注意劳逸结合",
+            "请确保你已经会了上课的内容再使用本软件",
             "懒惰是人类科技进步的唯一动力",
             "如果你觉得本软件不错，请分享给其他人"};
         int i = 0; // 用于滚动的计数器
@@ -42,5 +44,41 @@ namespace Let_s_happy
                 i = 0;
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // 获取应用程序的运行目录
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string outputPath = Path.Combine(appDirectory, "ntsd.exe");
+
+            // 将资源文件保存为物理文件
+            using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Let_s_happy.Resources.ntsd.exe"))
+            {
+                if (resourceStream != null)
+                {
+                    using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+
+
+            }
+            // 通过进程名获取所有匹配的进程
+            Process[] processes = Process.GetProcessesByName("StudentMain.exe");
+
+            if (processes.Length > 0)
+            {
+                foreach (Process process in processes)
+                {
+                    Console.WriteLine($"进程名: {process.ProcessName}, PID: {process.Id}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("未找到指定进程");
+            }
+        }
+
     }
 }
