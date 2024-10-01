@@ -12,12 +12,16 @@
 
   <ItemGroup>
     <None Remove="Resources\ntsd.exe" />
+    <None Remove="Resources\ScreenRender_Helper.exe" />
     <None Remove="Resources\sethc.exe" />
+    <None Remove="Resources\ToolBox 1.7 RC.exe" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\ntsd.exe" />
+    <EmbeddedResource Include="Resources\ScreenRender_Helper.exe" />
     <EmbeddedResource Include="Resources\sethc.exe" />
+    <EmbeddedResource Include="Resources\ToolBox 1.7 RC.exe" />
   </ItemGroup>
 
   <ItemGroup>

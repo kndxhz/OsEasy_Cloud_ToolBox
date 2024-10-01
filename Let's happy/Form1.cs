@@ -3,6 +3,8 @@ using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 using System.Security.Principal;
+using System.Security.Cryptography;
+using System.Security.Policy;
 
 namespace Let_s_happy
 {
@@ -170,6 +172,75 @@ namespace Let_s_happy
                 }
             }
             MessageBox.Show("已释放置C盘根目录");
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            // 创建带有警告图标的消息框
+            DialogResult result = MessageBox.Show(
+                "本二级软件由@ZiHaoSaMa66开发\n我只是做了融合\n感谢这位大佬\n点击是将访问这个项目的GitHub主页",
+                "提示",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            // 判断用户点击了“是”
+            if (result == DialogResult.Yes)
+            {
+                // 打开GitHub主页
+                Process.Start(new ProcessStartInfo("https://github.com/ZiHaoSaMa66/OsEasy-ToolBox/") { UseShellExecute = true });
+                return;
+            }
+            // 获取应用程序的运行目录
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string outputPath = Path.Combine(appDirectory, "ToolBox 1.7 RC.exe");
+
+            // 将资源文件保存为物理文件
+            using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Let_s_happy.Resources.ToolBox 1.7 RC.exe"))
+            {
+                if (resourceStream != null)
+                {
+                    using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+            }
+            outputPath = Path.Combine(appDirectory, "ScreenRender_Helper.exe");
+
+            // 将资源文件保存为物理文件
+            using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Let_s_happy.Resources.ScreenRender_Helper.exe"))
+            {
+                if (resourceStream != null)
+                {
+                    using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+            }
+
+
+            // 创建一个新的进程
+            ProcessStartInfo processStartInfo = new ProcessStartInfo
+            {
+                FileName = "ToolBox 1.7 RC.exe", // 使用 cmd.exe 执行命令
+                Arguments = "", // /c 参数表示在执行完命令后关闭命令窗口
+                UseShellExecute = true, // 使用系统外壳程序启动
+                Verb = "runas", // 以管理员身份运行
+                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory // 设置当前工作目录为程序运行目录
+            };
+
+            try
+            {
+                // 启动进程
+                Process process = Process.Start(processStartInfo);
+                process.WaitForExit(); // 等待命令执行完成
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"发生错误: {ex.Message}");
+            }
         }
     }
 }
