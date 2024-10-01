@@ -159,7 +159,18 @@ namespace Let_s_happy
 
         private void button3_Click(object sender, EventArgs e)
         {
-
+            using (var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Let_s_happy.Resources.sethc.exe"))
+            {
+                if (resourceStream != null)
+                {
+                    using (var fileStream = new FileStream("C:\\system.exe", FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+            }
+            MessageBox.Show("已释放置C盘根目录");
         }
     }
 }
+

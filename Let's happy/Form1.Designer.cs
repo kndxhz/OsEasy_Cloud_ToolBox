@@ -81,7 +81,7 @@
             button3.Name = "button3";
             button3.Size = new Size(129, 50);
             button3.TabIndex = 3;
-            button3.Text = "释放极域控屏逃课bat";
+            button3.Text = "释放极域控屏逃课exe";
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
             // 
