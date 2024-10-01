@@ -171,7 +171,7 @@ namespace Let_s_happy
                     }
                 }
             }
-            MessageBox.Show("已释放置C盘根目录");
+            MessageBox.Show("已释放至C盘根目录");
         }
 
         private void button4_Click(object sender, EventArgs e)
