@@ -9,7 +9,7 @@
 - 使用浏览器访问 https://kndxhz.cn/jike.html 在线下载
 - 拷到U盘里，在机房电脑上运行
 # TODO
-- 卸载极域功能（不知道用的人多不多，而且容易被老师发现）```unins000.exe /slient```
+- 卸载极域功能（不知道用的人多不多，而且容易被老师发现）</br>手动卸载：```unins000.exe /slient```
 - 检查是否能够减小体积（就看机房电脑有没有运行环境了）
 # 求饶
 本程序大多数核心代码都是chatgpt+cv的，大佬轻喷</br>
@@ -19,6 +19,6 @@
 # 免责声明
 本程序仅用于学习交流，请勿用于非法用途，作者不承担任何责任
 # 致谢
-- [OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)为本程序提供了最核心的接噢易功能，真的特别感谢 @ZiHaoSaMa66 ，因为自己懒得再写一套就直接用现成的了
+- [OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)为本程序提供了最核心的解噢易功能，真的特别感谢 @ZiHaoSaMa66 ，因为自己懒得再写一套就直接用现成的了
 # 协议
 GPL V3
