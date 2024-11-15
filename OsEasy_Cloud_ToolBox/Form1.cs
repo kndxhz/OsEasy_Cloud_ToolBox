@@ -186,8 +186,9 @@ namespace OsEasy_Cloud_ToolBox
 
         }
 
-
-
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("www.baidu.com") { UseShellExecute = true });
         }
     }
-}
+   }
