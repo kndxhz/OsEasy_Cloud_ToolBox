@@ -5,8 +5,11 @@
 # 简介
 
 这是一个适用于噢易云机房的解控软件</br>
-需要注意的是，云噢易的机房由于 Windows 运行环境限制，只能解除监控</br>
+但是，云噢易的机房由于 Windows 运行环境限制，只能解除监控、网络限制等</br>
 如果需要解广播，请参考[这个 issue](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox/issues/25#issuecomment-2461922589)</br>
+需要注意的是：**此软件只适合小主机形式的噢易机房，如下图**
+![image](https://www.os-easy.com/uploads/allimg/230625/1-2306251A044325.png)</br>
+如果你不是这种云小主机，请参阅[OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)
 
 # 使用方法
 
@@ -14,17 +17,18 @@
 - 使用浏览器访问 https://kndxhz.cn/jike.html 在线下载
 - 拷到 U 盘里，在机房电脑上运行
 
-# 反馈
-
-请直接发 issus
-
 # 截图
+
 <details>
 <summary>点击展开查看截图</summary>
 
 ![image](https://private-user-images.githubusercontent.com/113306265/386751542-d31eda43-7d2b-4103-ad7d-22ed1caec493.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzE3MDM2NzQsIm5iZiI6MTczMTcwMzM3NCwicGF0aCI6Ii8xMTMzMDYyNjUvMzg2NzUxNTQyLWQzMWVkYTQzLTdkMmItNDEwMy1hZDdkLTIyZWQxY2FlYzQ5My5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQxMTE1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MTExNVQyMDQyNTRaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1kZjI5MTlmYjc5YjMyYjVjMzYwNThhZDU1YTVhMDFkMzQ4M2ZjZjViYjYwM2ZlMmViNWYwMjhlYjUwZTU0MTViJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.WmaFNxyI2U2__nI-yoTg6ySIcJOdPO32dPe4Yjw5ctY)
 
 </details>
+
+# 反馈
+
+请直接发 issus
 
 # 求饶
 
