@@ -30,7 +30,7 @@ namespace OsEasy_Cloud_ToolBox
         {
             InitializeComponent();
         }
-
+        public string directory;
         private void Form1_Load(object sender, EventArgs e)
         {
             // 检查是否以管理员权限运行
@@ -204,6 +204,12 @@ namespace OsEasy_Cloud_ToolBox
         {
         
             Process.Start(new ProcessStartInfo("https://github.com/kndxhz/OsEasy_Cloud_ToolBox") { UseShellExecute = true });
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            form2.Show();  // 使用 Show() 使新窗口非阻塞
         }
     }
    }
