@@ -198,7 +198,7 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Process.Start(new ProcessStartInfo("www.baidu.com") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://cn-sy1.rains3.com/xhz/ToolBox%20(1).zip") { UseShellExecute = true });
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
