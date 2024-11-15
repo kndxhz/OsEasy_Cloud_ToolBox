@@ -190,5 +190,11 @@ namespace OsEasy_Cloud_ToolBox
         {
             Process.Start(new ProcessStartInfo("www.baidu.com") { UseShellExecute = true });
         }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+        
+            Process.Start(new ProcessStartInfo("https://github.com/kndxhz/OsEasy_Cloud_ToolBox") { UseShellExecute = true });
+        }
     }
    }
