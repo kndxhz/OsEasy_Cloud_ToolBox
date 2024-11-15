@@ -4,6 +4,7 @@ using System.IO;
 using System.Security.Principal;
 using System.Text;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace OsEasy_Cloud_ToolBox
 {
@@ -17,7 +18,8 @@ namespace OsEasy_Cloud_ToolBox
             "锟斤拷烫烫烫",
             "if...else...仙人！",
             "While True仙人",
-            "不要自己造轮子！"
+            "不要自己造轮子！",
+            "Fuck you Linus"
         };
 
         private int currentSentenceIndex = 0; // 当前显示的句子索引
@@ -57,7 +59,14 @@ namespace OsEasy_Cloud_ToolBox
 
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
             this.label1.Text = "";
-
+            try { 
+            var process = Process.GetProcessesByName("Student").FirstOrDefault();
+            string directory = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
+            }
+            catch (Exception)
+            {
+                string directory = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
+            }
             // 初始化定时器
             typingTimer = new Timer();
             typingTimer.Interval = 100; // 设置每次显示字符的间隔（100毫秒）
