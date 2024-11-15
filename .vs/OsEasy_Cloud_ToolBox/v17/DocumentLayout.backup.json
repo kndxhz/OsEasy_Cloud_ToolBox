@@ -39,20 +39,20 @@
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "OsEasy_Cloud_ToolBox",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj",
-              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj*",
-              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj*",
+              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj",
+              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-11-15T19:40:40.776Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
             },
             {
               "$type": "Document",
@@ -62,7 +62,7 @@
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Form2.cs",
               "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Form2.cs*",
               "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Form2.cs*",
-              "ViewState": "AgIAABkAAAAAAAAAAAAqwC8AAAA3AAAAAAAAAA==",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAxwC4AAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-15T18:22:23.9Z",
               "EditorCaption": ""
@@ -85,9 +85,9 @@
               "Title": "Form1.cs",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Form1.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Form1.cs",
-              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Form1.cs*",
-              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Form1.cs*",
-              "ViewState": "AgIAABEAAAAAAAAAAAAQwCAAAAAIAAAAAAAAAA==",
+              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Form1.cs",
+              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Form1.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAYwEsAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-15T16:05:01.701Z",
               "EditorCaption": ""
@@ -98,8 +98,8 @@
               "Title": "Form1.cs [\u8BBE\u8BA1]",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Form1.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Form1.cs",
-              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Form1.cs [\u8BBE\u8BA1]*",
-              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Form1.cs [\u8BBE\u8BA1]*",
+              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Form1.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Form1.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-15T15:33:17.292Z",
               "EditorCaption": " [\u8BBE\u8BA1]"

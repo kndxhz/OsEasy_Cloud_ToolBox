@@ -30,7 +30,7 @@ namespace OsEasy_Cloud_ToolBox
         {
             InitializeComponent();
         }
-        public string directory;
+        public static string directory1;
         private void Form1_Load(object sender, EventArgs e)
         {
             // 检查是否以管理员权限运行
@@ -61,11 +61,12 @@ namespace OsEasy_Cloud_ToolBox
             this.label1.Text = "";
             try { 
             var process = Process.GetProcessesByName("Student").FirstOrDefault();
-            string directory = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
+            directory1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
+            MessageBox.Show(directory1);
             }
             catch (Exception)
             {
-                string directory = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
+                directory1 = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
             }
             // 初始化定时器
             typingTimer = new Timer();

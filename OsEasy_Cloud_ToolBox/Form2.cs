@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 
 namespace OsEasy_Cloud_ToolBox
 {
@@ -42,14 +43,69 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Form1 form1 = new Form1();
+            
+            
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = form1.directory+"Student.exe", // 获取当前程序的路径
+                FileName = $"{Form1.directory1}\\Student.exe", // 获取当前程序的路径
+                Arguments = "",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
             };
             Process.Start(startInfo);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://ipw.cn/") { UseShellExecute = true });
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            string result = RunCmdCommand("ipconfig /all");
+            string tempDir = Path.GetTempPath();
+            using (StreamWriter writer = new StreamWriter(tempDir + "ipconfig.txt"))
+            {
+                writer.WriteLine(result);  // 写入字符串内容
+            }
+            ProcessStartInfo processStartInfo = new ProcessStartInfo
+            {
+                FileName = "notepad.exe",           
+                Arguments = $"{tempDir}\\ipconfig.txt",
+                
+            };
+            Process process = new Process { StartInfo = processStartInfo };
+            process.Start();
+        }
+        static string RunCmdCommand(string command)
+        {
+            // 创建一个新的进程启动 cmd 命令
+            ProcessStartInfo processStartInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",           // 指定启动 cmd
+                Arguments = $"/c {command}",    // /c 参数表示执行完命令后关闭 cmd
+                RedirectStandardOutput = true,  // 重定向标准输出
+                UseShellExecute = false,       // 必须设置为 false，才能重定向输出
+                CreateNoWindow = true          // 不显示命令窗口
+            };
+
+            Process process = new Process { StartInfo = processStartInfo };
+
+            try
+            {
+                process.Start();  // 启动进程
+
+                // 获取命令的输出
+                string output = process.StandardOutput.ReadToEnd();
+
+                process.WaitForExit();  // 等待命令执行完毕
+
+                return output;
+            }
+            catch (Exception ex)
+            {
+                return "执行命令时出错: " + ex.Message;
+            }
         }
     }
    
