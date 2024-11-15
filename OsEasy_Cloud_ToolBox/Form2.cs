@@ -38,7 +38,7 @@ namespace OsEasy_Cloud_ToolBox
 
         private void label1_Click(object sender, EventArgs e)
         {
-            Process.Start(new ProcessStartInfo("kndxhz.cn") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://kndxhz.cn/") { UseShellExecute = true });
         }
 
         private void button2_Click(object sender, EventArgs e)

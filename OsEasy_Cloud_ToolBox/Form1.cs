@@ -60,9 +60,9 @@ namespace OsEasy_Cloud_ToolBox
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
             this.label1.Text = "";
             try { 
-            var process = Process.GetProcessesByName("Student").FirstOrDefault();
-            directory1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
-            MessageBox.Show(directory1);
+                var process = Process.GetProcessesByName("Student").FirstOrDefault();
+                directory1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
+                
             }
             catch (Exception)
             {
