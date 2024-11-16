@@ -11,6 +11,11 @@ namespace OsEasy_Cloud_ToolBox
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
+        /// 
+
+        // 检测是否传入 --debug 参数
+        public static string[] args = Environment.GetCommandLineArgs();
+        public static string argsString = string.Join(" ", args.Skip(1)); // 跳过第一个元素（应用程序路径）
         [STAThread]
         static void Main()
         {
@@ -22,8 +27,8 @@ namespace OsEasy_Cloud_ToolBox
             isDebugMode = true;
 #endif
 
-            // 检测是否传入 --debug 参数
-            string[] args = Environment.GetCommandLineArgs();
+            
+
             if (args.Contains("--debug"))
             {
                 isDebugMode = true;

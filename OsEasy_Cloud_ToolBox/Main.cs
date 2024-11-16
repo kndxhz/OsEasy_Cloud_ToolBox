@@ -167,9 +167,11 @@ namespace OsEasy_Cloud_ToolBox
         // 以管理员权限重新启动当前程序
         private void RestartAsAdmin()
         {
+            
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = Application.ExecutablePath, // 获取当前程序的路径
+                Arguments = Program.argsString, // 传递命令行参数
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
             };
