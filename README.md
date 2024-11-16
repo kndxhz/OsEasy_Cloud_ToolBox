@@ -1,6 +1,7 @@
 # OsEasy_Cloud_ToolBox
 
 ![OsEasy_Cloud_ToolBox](https://socialify.git.ci/kndxhz/OsEasy_Cloud_ToolBox/image?description=1&descriptionEditable=%E9%80%82%E7%94%A8%E4%BA%8E%E5%99%A2%E6%98%93%E4%BA%91%E6%9C%BA%E6%88%BF%E7%9A%84%E6%9C%BA%E6%88%BF%E8%A7%A3%E6%8E%A7%E8%BD%AF%E4%BB%B6&font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/kndxhz/OsEasy_Cloud_ToolBox/total?style=for-the-badge)
 
 # 简介
 
@@ -19,7 +20,7 @@
 
 | 命令行参数 | 描述              |
 | ---------- | ----------------- |
-| `--debug`    | 打开 debuger 窗口 |
+| `--debug`  | 打开 debuger 窗口 |
 
 # 截图
 
