@@ -16,10 +16,17 @@ namespace OsEasy_Cloud_ToolBox
             "《机课时间管理》",
             "开源造福人类",
             "锟斤拷烫烫烫",
-            "if...else...仙人！",
+            "if...else...仙人",
             "While True仙人",
-            "不要自己造轮子！",
-            "Fuck you Linus"
+            "Fuck you Linus",
+            "Hello World!",
+            "世界...遗忘我...",
+            "你打cs吗",
+            "Python(屁眼通红)",
+            "C#(C++ *2)",
+            "你要来杯Jvav吗",
+            "尝试使用--debug参数或debug环境打开debuger！"
+
         };
 
         private int currentSentenceIndex = 0; // 当前显示的句子索引
@@ -101,7 +108,7 @@ namespace OsEasy_Cloud_ToolBox
 
                 // 设置间隔时间后切换到下一个句子
                 Timer switchSentenceTimer = new Timer();
-                switchSentenceTimer.Interval = 1000; // 切换句子的间隔（1000毫秒）
+                switchSentenceTimer.Interval = 3000; // 切换句子的间隔（3000毫秒）
                 switchSentenceTimer.Tick += (s, args) =>
                 {
                     // 重新设置定时器，显示下一个句子
@@ -222,5 +229,9 @@ namespace OsEasy_Cloud_ToolBox
             form2.Show();  // 使用 Show() 使新窗口非阻塞
         }
 
+        private void label1_Click(object sender, EventArgs e)
+        {
+            currentSentenceIndex+= 1;
+        }
     }
    }
