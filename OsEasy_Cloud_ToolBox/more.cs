@@ -15,9 +15,9 @@ using System.IO;
 
 namespace OsEasy_Cloud_ToolBox
 {
-    public partial class Form2 : Form
+    public partial class more : Form
     {
-        public Form2()
+        public more()
         {
             InitializeComponent();
         }
@@ -47,12 +47,19 @@ namespace OsEasy_Cloud_ToolBox
             
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = $"{Form1.directory1}\\Student.exe", // 获取当前程序的路径
+                FileName = $"{Main.directory1}\\Student.exe", // 获取当前程序的路径
                 Arguments = "",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
             };
-            Process.Start(startInfo);
+            try
+            {
+                Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("目录不存在：\n" + ex.Message);
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)

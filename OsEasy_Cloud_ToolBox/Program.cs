@@ -16,7 +16,26 @@ namespace OsEasy_Cloud_ToolBox
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            // 检测是否在调试模式
+            bool isDebugMode = false;
+#if DEBUG
+            isDebugMode = true;
+#endif
+
+            // 检测是否传入 --debug 参数
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Contains("--debug"))
+            {
+                isDebugMode = true;
+            }
+
+            // 如果在调试模式，打开 Form3
+            if (isDebugMode)
+            {
+                Debuger debugForm = new Debuger();
+                debugForm.Show();
+            }
+            Application.Run(new Main());
         }
     }
 }

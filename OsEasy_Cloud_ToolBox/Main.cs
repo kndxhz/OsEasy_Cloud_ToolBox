@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace OsEasy_Cloud_ToolBox
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
         // 存储一系列的句子
         private string[] sentences = new string[]
@@ -26,13 +26,17 @@ namespace OsEasy_Cloud_ToolBox
         private int currentCharIndex = 0; // 当前句子的字符索引
         private Timer typingTimer;
 
-        public Form1()
+        public Main()
         {
             InitializeComponent();
         }
         public static string directory1;
+        [STAThread]
         private void Form1_Load(object sender, EventArgs e)
         {
+
+            
+
             // 检查是否以管理员权限运行
             if (!IsRunAsAdmin())
             {
@@ -75,6 +79,9 @@ namespace OsEasy_Cloud_ToolBox
 
             // 开始打字效果
             typingTimer.Start();
+
+
+            
         }
 
         // 定时器事件：每次触发时，逐个显示字符
@@ -209,8 +216,9 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button4_Click(object sender, EventArgs e)
         {
-            Form2 form2 = new Form2();
+            more form2 = new more();
             form2.Show();  // 使用 Show() 使新窗口非阻塞
         }
+
     }
    }
