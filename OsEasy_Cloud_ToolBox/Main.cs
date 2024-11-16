@@ -215,6 +215,10 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button3_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("此工具箱由 @ZiHaoSaMa66 开发\n这是适用于本地机房的\n由于版本不一样\n可能会有部分功能无法使用",
+    "提示",
+    MessageBoxButtons.OK,
+    MessageBoxIcon.Warning);
             Process.Start(new ProcessStartInfo("https://cn-sy1.rains3.com/xhz/ToolBox%20(1).zip") { UseShellExecute = true });
         }
 
