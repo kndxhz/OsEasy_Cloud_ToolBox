@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("OsEasy_Cloud_ToolBox")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("适用于噢易云机房的工具箱")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("可耐的小伙纸")]
 [assembly: AssemblyProduct("OsEasy_Cloud_ToolBox")]
 [assembly: AssemblyCopyright("Copyright ©  2024")]
 [assembly: AssemblyTrademark("")]
@@ -30,6 +30,6 @@ using System.Runtime.InteropServices;
 //      生成号
 //      修订号
 //
-[assembly: AssemblyVersion("2.0.0.0")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
+[assembly: AssemblyVersion("2.0.0.1")]
+[assembly: AssemblyFileVersion("2.0.0.3")]
 [assembly: NeutralResourcesLanguage("zh-Hans")]
