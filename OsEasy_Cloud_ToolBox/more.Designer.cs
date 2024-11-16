@@ -75,7 +75,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(225, 50);
             this.button1.TabIndex = 5;
-            this.button1.Text = "???";
+            this.button1.Text = "挂起学生端";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -90,7 +90,7 @@
             this.label1.Text = "Coryright @ 2024-Now KNDXHZ";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
-            // Form2
+            // More
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -101,7 +101,7 @@
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.MaximizeBox = false;
-            this.Name = "Form2";
+            this.Name = "More";
             this.Text = "更多工具";
             this.Load += new System.EventHandler(this.Form2_Load);
             this.ResumeLayout(false);

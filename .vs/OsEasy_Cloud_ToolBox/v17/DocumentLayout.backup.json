@@ -3,19 +3,7 @@
   "WorkspaceRootPath": "E:\\C#\\OsEasy_Cloud_ToolBox\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|e:\\c#\\oseasy_cloud_toolbox\\oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|OsEasy_Cloud_ToolBox||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\AppData\\Local\\Temp\\.vsdbgsrc\\1cfd75d69c890cbb91b8192638aaa96ef9f473a44c4c814dffa093d8ade745ab\\__Error.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\debuger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -26,12 +14,27 @@
       "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\debuger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\more.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|e:\\c#\\oseasy_cloud_toolbox\\oseasy_cloud_toolbox\\more.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\more.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\more.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\more.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|OsEasy_Cloud_ToolBox||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|E:\\C#\\OsEasy_Cloud_ToolBox\\oseasy_cloud_toolbox\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C503234-1066-428B-9A45-C35F2787F619}|OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj|solutionrelative:oseasy_cloud_toolbox\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -41,7 +44,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -49,7 +52,18 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
+              "Title": "__Error.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\.vsdbgsrc\\1cfd75d69c890cbb91b8192638aaa96ef9f473a44c4c814dffa093d8ade745ab\\__Error.cs",
+              "ToolTip": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\.vsdbgsrc\\1cfd75d69c890cbb91b8192638aaa96ef9f473a44c4c814dffa093d8ade745ab\\__Error.cs [\u53EA\u8BFB]",
+              "ViewState": "AgIAAJUAAAAAAAAAAAAWwKYAAAACAAAAAQAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-16T14:42:34.668Z",
+              "EditorCaption": " [\u53EA\u8BFB]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Program.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Program.cs",
@@ -61,30 +75,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
               "Title": "Debuger.cs [\u8BBE\u8BA1]",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Debuger.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Debuger.cs",
               "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Debuger.cs [\u8BBE\u8BA1]",
               "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Debuger.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-16T09:15:35.161Z"
+              "WhenOpened": "2024-11-16T09:15:35.161Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "Debuger.cs",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Debuger.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Debuger.cs",
               "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Debuger.cs",
               "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Debuger.cs",
-              "ViewState": "AgIAAHoAAAAAAAAAAAAqwJEAAAAyAAAAAAAAAA==",
+              "ViewState": "AgIAAHsAAAAAAAAAAAAmwJ0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-16T08:55:52.335Z"
+              "WhenOpened": "2024-11-16T08:55:52.335Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "OsEasy_Cloud_ToolBox",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox.csproj",
@@ -95,50 +111,53 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 3,
               "Title": "More.cs",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\More.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\More.cs",
               "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\More.cs",
               "RelativeToolTip": "OsEasy_Cloud_ToolBox\\More.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAwwDEAAAA4AAAAAAAAAA==",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAuwI8AAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-15T18:22:23.9Z"
+              "WhenOpened": "2024-11-15T18:22:23.9Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 6,
               "Title": "More.cs [\u8BBE\u8BA1]",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\More.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\More.cs",
               "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\More.cs [\u8BBE\u8BA1]",
               "RelativeToolTip": "OsEasy_Cloud_ToolBox\\More.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-15T18:20:56.507Z"
+              "WhenOpened": "2024-11-15T18:20:56.507Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "Main.cs",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Main.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Main.cs",
-              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Main.cs*",
-              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Main.cs*",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAuwBsAAAAsAAAAAAAAAA==",
+              "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Main.cs",
+              "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Main.cs",
+              "ViewState": "AgIAAE0AAAAAAAAAAAAxwGIAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-15T16:05:01.701Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "Main.cs [\u8BBE\u8BA1]",
               "DocumentMoniker": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Main.cs",
               "RelativeDocumentMoniker": "OsEasy_Cloud_ToolBox\\Main.cs",
               "ToolTip": "E:\\C#\\OsEasy_Cloud_ToolBox\\OsEasy_Cloud_ToolBox\\Main.cs [\u8BBE\u8BA1]",
               "RelativeToolTip": "OsEasy_Cloud_ToolBox\\Main.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-15T15:33:17.292Z"
+              "WhenOpened": "2024-11-15T15:33:17.292Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
             }
           ]
         }

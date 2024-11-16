@@ -1,22 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Net.Sockets;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace OsEasy_Cloud_ToolBox
 {
     public partial class More : Form
     {
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr OpenThread(int dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
+
+        [DllImport("kernel32.dll")]
+        private static extern uint SuspendThread(IntPtr hThread);
+
+        [DllImport("kernel32.dll")]
+        private static extern uint ResumeThread(IntPtr hThread);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool CloseHandle(IntPtr hObject);
+
+
+        private const int THREAD_SUSPEND_RESUME = 0x0002;
+        
+        private bool isSuspended = false; // 记录当前是否已挂起
         public More()
         {
             InitializeComponent();
@@ -29,11 +37,67 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button1_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show(
-            "这是一个预留的按钮\n目前还不知道可以做什么\n有想法欢迎发issue",  // 消息内容
-            "",                          // 标题
-            MessageBoxButtons.OK,          
-            MessageBoxIcon.Information);
+
+
+
+
+            try
+            {
+                // 获取目标进程（例如 Student.exe）
+                var processes = Process.GetProcessesByName("Student");
+                if (processes.Length == 0)
+                {
+                    MessageBox.Show("未找到 Student.exe 进程！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 根据当前状态决定挂起或恢复
+                if (!isSuspended)
+                {
+                    foreach (Form form in Application.OpenForms)
+                    {
+                        form.Hide();
+                    }
+                    Thread.Sleep(3000);
+                    // 挂起所有线程
+                    foreach (ProcessThread thread in processes[0].Threads)
+                    {
+                        IntPtr pOpenThread = OpenThread(THREAD_SUSPEND_RESUME, false, (uint)thread.Id);
+                        if (pOpenThread == IntPtr.Zero) continue;
+
+                        SuspendThread(pOpenThread);
+                        CloseHandle(pOpenThread);
+                    }
+
+                    isSuspended = true; // 更新状态
+                    this.button1.Text = "恢复学生端";
+                    //MessageBox.Show("Student.exe 已成功挂起！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // 恢复所有线程
+                    foreach (ProcessThread thread in processes[0].Threads)
+                    {
+                        IntPtr pOpenThread = OpenThread(THREAD_SUSPEND_RESUME, false, (uint)thread.Id);
+                        if (pOpenThread == IntPtr.Zero) continue;
+
+                        while (ResumeThread(pOpenThread) > 0) { } // 确保完全恢复
+                        CloseHandle(pOpenThread);
+                    }
+
+                    isSuspended = false; // 更新状态
+                    this.button1.Text = "挂起学生端";
+                    MessageBox.Show("Student.exe 已恢复运行！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            foreach (Form form in Application.OpenForms)
+            {
+                form.Show();
+            }
         }
 
         private void label1_Click(object sender, EventArgs e)

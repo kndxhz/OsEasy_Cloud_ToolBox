@@ -21,6 +21,7 @@ namespace OsEasy_Cloud_ToolBox
             "Fuck you Linus",
             "Hello World!",
             "世界...遗忘我...",
+            "MAGA!",
             "你打cs吗",
             "Python(屁眼通红)",
             "C#(C++ *2)",
@@ -229,9 +230,6 @@ namespace OsEasy_Cloud_ToolBox
             form2.Show();  // 使用 Show() 使新窗口非阻塞
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-            currentSentenceIndex+= 1;
-        }
+
     }
    }
