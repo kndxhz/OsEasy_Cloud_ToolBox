@@ -1,6 +1,6 @@
 ﻿namespace OsEasy_Cloud_ToolBox
 {
-    partial class more
+    partial class More
     {
         /// <summary>
         /// Required designer variable.

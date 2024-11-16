@@ -218,7 +218,7 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button4_Click(object sender, EventArgs e)
         {
-            more form2 = new more();
+            More form2 = new More();
             form2.Show();  // 使用 Show() 使新窗口非阻塞
         }
 

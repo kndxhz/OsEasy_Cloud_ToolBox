@@ -48,23 +48,29 @@ namespace OsEasy_Cloud_ToolBox
 
             // 获取 Form1、Form2 和 Form3 的所有变量
             var form1Variables = GetAllVariables(typeof(Main));
-            var form2Variables = GetAllVariables(typeof(more));
+            var form2Variables = GetAllVariables(typeof(More));
             var form3Variables = GetAllVariables(typeof(Debuger));
+            var form4Variables = GetAllVariables(typeof(Program));
 
             // 添加数据到 DataGridView
             foreach (var variable in form1Variables)
             {
-                dataGridView1.Rows.Add("Form1." + variable.Name, variable.Type, variable.Value);
+                dataGridView1.Rows.Add("Main." + variable.Name, variable.Type, variable.Value);
             }
 
             foreach (var variable in form2Variables)
             {
-                dataGridView1.Rows.Add("Form2." + variable.Name, variable.Type, variable.Value);
+                dataGridView1.Rows.Add("More." + variable.Name, variable.Type, variable.Value);
             }
 
             foreach (var variable in form3Variables)
             {
-                dataGridView1.Rows.Add("Form3." + variable.Name, variable.Type, variable.Value);
+                dataGridView1.Rows.Add("Debuger." + variable.Name, variable.Type, variable.Value);
+            }
+            
+            foreach (var variable in form4Variables)
+            {
+                dataGridView1.Rows.Add("Program." + variable.Name, variable.Type, variable.Value);
             }
 
             // 自适应行宽和行高
@@ -88,31 +94,40 @@ namespace OsEasy_Cloud_ToolBox
         private void UpdateVariable(string variableName, string newValue)
         {
             // 查找变量名对应的字段，更新字段的值
-            if (variableName.StartsWith("Form1."))
+            if (variableName.StartsWith("Main."))
             {
-                var fieldName = variableName.Substring(6); // 去除 "Form1."
-                var form1Variable = typeof(Main).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var fieldName = variableName.Substring(5); // 去除 "Form1."
+                var form1Variable = typeof(Main).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.CreateInstance | BindingFlags.NonPublic);
                 if (form1Variable != null)
                 {
                     UpdateFieldValue(form1Variable, newValue);
                 }
             }
-            else if (variableName.StartsWith("Form2."))
+            else if (variableName.StartsWith("More."))
             {
-                var fieldName = variableName.Substring(6); // 去除 "Form2."
-                var form2Variable = typeof(more).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var fieldName = variableName.Substring(5); // 去除 "Form2."
+                var form2Variable = typeof(Main).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.CreateInstance | BindingFlags.NonPublic);
                 if (form2Variable != null)
                 {
                     UpdateFieldValue(form2Variable, newValue);
                 }
             }
-            else if (variableName.StartsWith("Form3."))
+            else if (variableName.StartsWith("Debuger."))
             {
-                var fieldName = variableName.Substring(6); // 去除 "Form3."
-                var form3Variable = typeof(Debuger).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var fieldName = variableName.Substring(8); // 去除 "Form3."
+                var form3Variable = typeof(Main).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.CreateInstance | BindingFlags.NonPublic);
                 if (form3Variable != null)
                 {
                     UpdateFieldValue(form3Variable, newValue);
+                }
+            }
+            else if (variableName.StartsWith("Program."))
+            {
+                var fieldName = variableName.Substring(8); // 去除 "Form3."
+                var form4Variable = typeof(Main).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.CreateInstance | BindingFlags.NonPublic);
+                if (form4Variable != null)
+                {
+                    UpdateFieldValue(form4Variable, newValue);
                 }
             }
         }
@@ -145,7 +160,11 @@ namespace OsEasy_Cloud_ToolBox
         private static (string Name, string Type, object Value)[] GetAllVariables(Type type)
         {
             // 获取所有字段（实例和静态，公有和私有）
-            var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (BindingFlags flag in Enum.GetValues(typeof(BindingFlags)))
+            {
+                Console.WriteLine(flag);
+            }
+            var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.CreateInstance | BindingFlags.NonPublic);
 
             // 创建一个实例（用于读取实例字段）
             object instance = null;

@@ -15,9 +15,9 @@ using System.IO;
 
 namespace OsEasy_Cloud_ToolBox
 {
-    public partial class more : Form
+    public partial class More : Form
     {
-        public more()
+        public More()
         {
             InitializeComponent();
         }
