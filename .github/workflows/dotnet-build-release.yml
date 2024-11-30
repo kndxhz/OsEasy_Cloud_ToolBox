@@ -1,4 +1,4 @@
-name: .NET Build and Release
+name: .NET Build and Release (Self-Contained)
 
 on:
   push:
@@ -41,7 +41,6 @@ jobs:
       - name: Get current version
         id: version
         run: |
-          # 获取当前的版本号
           VERSION=$(grep -oP '(?<=<Version>)(.*?)(?=</Version>)' MyProject/MyProject.csproj)
           echo "Current Version: $VERSION"
           echo "::set-output name=version::$VERSION"
@@ -49,7 +48,6 @@ jobs:
       - name: Increment version
         id: increment_version
         run: |
-          # 使用 Git tag 来迭代版本号
           VERSION=${{ steps.version.outputs.version }}
           VERSION_PARTS=(${VERSION//./ })
           PATCH=${VERSION_PARTS[2]}
@@ -84,10 +82,11 @@ jobs:
         with:
           dotnet-version: '6.0'
 
-      - name: Publish application
+      - name: Publish application (Self-contained)
         run: |
-          dotnet publish --configuration Release --output ./publish
-          
+          dotnet publish --configuration Release --self-contained --runtime win-x64 --output ./publish
+          echo "Published as self-contained application."
+
       - name: Create release artifact
         uses: actions/upload-artifact@v3
         with:
