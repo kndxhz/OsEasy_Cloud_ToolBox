@@ -58,7 +58,7 @@ namespace OsEasy_Cloud_ToolBox
                     {
                         form.Hide();
                     }
-                    Thread.Sleep(3000);
+                    Thread.Sleep(5000);
                     // 挂起所有线程
                     foreach (ProcessThread thread in processes[0].Threads)
                     {
@@ -128,25 +128,41 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Process.Start(new ProcessStartInfo("https://ipw.cn/") { UseShellExecute = true });
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = $"{Main.directory1}\\Teacher.exe", // 获取当前程序的路径
+                Arguments = "",
+                Verb = "runas",                         // 以管理员权限运行
+                UseShellExecute = true                  // 使用外部 shell 启动
+            };
+            try
+            {
+                Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("目录不存在：\n" + ex.Message);
+            }
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            string result = RunCmdCommand("ipconfig /all");
-            string tempDir = Path.GetTempPath();
-            using (StreamWriter writer = new StreamWriter(tempDir + "ipconfig.txt"))
-            {
-                writer.WriteLine(result);  // 写入字符串内容
-            }
-            ProcessStartInfo processStartInfo = new ProcessStartInfo
-            {
-                FileName = "notepad.exe",           
-                Arguments = $"{tempDir}\\ipconfig.txt",
-                
-            };
-            Process process = new Process { StartInfo = processStartInfo };
-            process.Start();
+            MessageBox.Show("数据（进程名）待收集\n暂时无法使用");
+            //ProcessStartInfo startInfo = new ProcessStartInfo
+            //{
+            //    FileName = $"{Main.directory1}\\Teacher.exe", // 获取当前程序的路径
+            //    Arguments = "",
+            //    Verb = "runas",                         // 以管理员权限运行
+            //    UseShellExecute = true                  // 使用外部 shell 启动
+            //};
+            //try
+            //{
+            //    Process.Start(startInfo);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show("目录不存在：\n" + ex.Message);
+            //}
         }
         static string RunCmdCommand(string command)
         {

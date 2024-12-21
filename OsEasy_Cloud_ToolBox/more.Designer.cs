@@ -42,7 +42,7 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(225, 50);
             this.button4.TabIndex = 8;
-            this.button4.Text = "IPCONFIG";
+            this.button4.Text = "卸载学生端\r\n（高危操作！！！）";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
@@ -53,7 +53,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(225, 50);
             this.button3.TabIndex = 7;
-            this.button3.Text = "查看公网IP";
+            this.button3.Text = "启动教师端";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 

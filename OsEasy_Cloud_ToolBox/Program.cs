@@ -11,36 +11,13 @@ namespace OsEasy_Cloud_ToolBox
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
-        /// 
-
-        // 检测是否传入 --debug 参数
-        public static string[] args = Environment.GetCommandLineArgs();
-        public static string argsString = string.Join(" ", args.Skip(1)); // 跳过第一个元素（应用程序路径）
-        [STAThread]
+        [STAThread] // 标明应用程序是单线程单元 (STA) 模型，通常在UI应用中使用
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            // 检测是否在调试模式
-            bool isDebugMode = false;
-#if DEBUG
-            isDebugMode = true;
-#endif
-
-            
-
-            if (args.Contains("--debug"))
-            {
-                isDebugMode = true;
-            }
-
-            // 如果在调试模式，打开 Form3
-            if (isDebugMode)
-            {
-                Debuger debugForm = new Debuger();
-                debugForm.Show();
-            }
-            Application.Run(new Main());
+            Application.EnableVisualStyles(); // 启用视觉样式
+            Application.SetCompatibleTextRenderingDefault(false); // 设置兼容文本渲染模式
+            Application.Run(new Main()); // 启动主窗体
         }
     }
 }
+

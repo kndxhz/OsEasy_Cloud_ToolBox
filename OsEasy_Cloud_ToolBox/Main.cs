@@ -25,8 +25,7 @@ namespace OsEasy_Cloud_ToolBox
             "你打cs吗",
             "Python(屁眼通红)",
             "C#(C++ *2)",
-            "你要来杯Jvav吗",
-            "尝试使用--debug参数或debug环境打开debuger！"
+            "你要来杯Jvav吗"
 
         };
 
@@ -179,7 +178,7 @@ namespace OsEasy_Cloud_ToolBox
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = Application.ExecutablePath, // 获取当前程序的路径
-                Arguments = Program.argsString, // 传递命令行参数
+                //Arguments = Program.argsString, // 传递命令行参数
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
             };
@@ -234,6 +233,9 @@ namespace OsEasy_Cloud_ToolBox
             form2.Show();  // 使用 Show() 使新窗口非阻塞
         }
 
-
+        private void label1_Click(object sender, EventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://kndxhz.cn/") { UseShellExecute = true });
+        }
     }
    }
