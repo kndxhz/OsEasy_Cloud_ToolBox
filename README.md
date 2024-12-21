@@ -27,8 +27,9 @@
 <details>
 <summary>点击展开查看截图</summary>
 
-- 程序主界面(带启动声明)</br>![image](https://github.com/user-attachments/assets/016ce5a4-22c3-4c38-b852-09c0b0a0050a)
-- debuger 界面</br>![image](https://github.com/user-attachments/assets/d8f400dd-638b-422f-83e3-d14797508420)
+- 启动声明</br>![image](https://github.com/user-attachments/assets/0001e6ec-ff91-4242-a9d9-ab5fc8a54fd6)
+- 程序主界面</br>![image](https://github.com/user-attachments/assets/3601b83f-3264-49b3-8e7d-510051ef8bf2)
+- 更多界面</br>![image](https://github.com/user-attachments/assets/18371462-bae8-492f-836d-9b9c3ab7dbc6)
 
 </details>
 
