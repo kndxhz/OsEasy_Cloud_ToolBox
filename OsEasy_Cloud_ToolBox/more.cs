@@ -147,22 +147,22 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button4_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("数据（进程名）待收集\n暂时无法使用");
-            //ProcessStartInfo startInfo = new ProcessStartInfo
-            //{
-            //    FileName = $"{Main.directory1}\\Teacher.exe", // 获取当前程序的路径
-            //    Arguments = "",
-            //    Verb = "runas",                         // 以管理员权限运行
-            //    UseShellExecute = true                  // 使用外部 shell 启动
-            //};
-            //try
-            //{
-            //    Process.Start(startInfo);
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("目录不存在：\n" + ex.Message);
-            //}
+            //MessageBox.Show("数据（进程名）待收集\n暂时无法使用");
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = $"{Main.directory1}\\uninst.exe", // 获取当前程序的路径
+                Arguments = "",
+                Verb = "runas",                         // 以管理员权限运行
+                UseShellExecute = true                  // 使用外部 shell 启动
+            };
+            try
+            {
+                Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("目录不存在：\n" + ex.Message);
+            }
         }
         static string RunCmdCommand(string command)
         {
