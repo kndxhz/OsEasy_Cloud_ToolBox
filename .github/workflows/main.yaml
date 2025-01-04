@@ -44,7 +44,7 @@ jobs:
           cat release_notes.md
 
       - name: Create a GitHub release
-        uses: gh_action/github-release-action@v1
+        uses: softprops/action-gh-release@v1  # 使用正确的GitHub Release Action
         with:
           tag_name: v${{ steps.create_tag.outputs.tag }}
           release_name: v${{ steps.create_tag.outputs.tag }}
@@ -52,4 +52,3 @@ jobs:
           files: |
             ./bin/Release/OsEasy_Cloud_ToolBox.exe  # 编译后的exe文件路径
             ./src/OsEasy_Cloud_ToolBox.zip  # 代码压缩包路径
-
