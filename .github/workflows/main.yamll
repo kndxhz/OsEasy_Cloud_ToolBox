@@ -1,0 +1,76 @@
+name: 自动更新版本和发布
+
+on:
+  workflow_dispatch:
+    inputs:
+      参数:
+        description: "手动触发参数（可选）"
+        required: false
+        default: "触发"
+
+jobs:
+  更新版本号和发布:
+    runs-on: windows-latest
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 更新版本号
+      id: 更新版本号
+      run: |
+        $filePath = "${{ github.workspace }}\Properties\AssemblyInfo.cs" # 使用GitHub默认路径
+        $content = Get-Content $filePath -Raw
+        if ($content -match "\[assembly: AssemblyVersion\(\"(\d+)\.(\d+)\.(\d+)\.(\d+)\"\)\]") {
+          $major = $matches[1]
+          $minor = $matches[2]
+          $build = $matches[3]
+          $revision = $matches[4]
+          $newVersion = "$major.$minor.$build.$([int]$revision + 1)"
+          $content = $content -replace "\[assembly: AssemblyVersion\(\".*?\"\)\]", "[assembly: AssemblyVersion(\"$newVersion\")"]
+          $content = $content -replace "\[assembly: AssemblyFileVersion\(\".*?\"\)\]", "[assembly: AssemblyFileVersion(\"$newVersion\")"]
+          Set-Content $filePath -Value $content
+          Write-Output "新版本号: $newVersion"
+        } else {
+          throw "无法找到版本号定义"
+        }
+        echo "new_version=$newVersion" >> $GITHUB_ENV
+
+    - name: 提交更改
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add ${{ github.workspace }}\Properties\AssemblyInfo.cs
+        git commit -m "更新版本号到 ${{ env.new_version }}"
+        git push
+
+    - name: 编译项目
+      run: |
+        msbuild ${{ github.workspace }}\你的解决方案文件.sln /p:Configuration=Release
+
+    - name: 创建发行版
+      id: 创建发行版
+      uses: actions/create-release@v1
+      with:
+        tag_name: v${{ env.new_version }}
+        release_name: ${{ env.new_version }}
+        body: |
+          # 版本号
+          ## 提交记录
+          ${{ steps.提交记录.outputs.logs }}
+        draft: false
+        prerelease: false
+
+    - name: 上传构建的应用程序
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.创建发行版.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}\bin\Release\应用程序.exe
+        asset_name: 应用程序.exe
+        asset_content_type: application/octet-stream
+
+    - name: 提交记录
+      id: 提交记录
+      run: |
+        $commits = $(git log --pretty=format:"- %s (#%h, @%an)" -n 10 | Where-Object { $_ -notmatch "更新版本号到" })
+        echo "logs=$commits" >> $GITHUB_ENV
