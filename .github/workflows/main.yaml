@@ -1,53 +1,55 @@
 name: Build and Release
 
 on:
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:  # 手动触发器
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'  # 可以根据需要选择Python版本
 
-    - name: Update version number
-      id: version
-      run: |
-        python update_version.py
-        echo "VERSION=$(cat Properties/AssemblyInfo.cs | grep -oP '\d+\.\d+\.\d+\.\d+' | head -n 1)" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt  # 如果有依赖文件
 
-    - name: Set up MSBuild for .NET Framework
-      uses: microsoft/setup-msbuild@v1.0.2
+      - name: Run version updater script
+        run: python version_updater.py
 
-    - name: Build the project
-      run: |
-        msbuild /p:Configuration=Release OsEasy_Cloud_ToolBox.csproj
+      - name: Build the project
+        run: |
+          msbuild /p:Configuration=Release /p:Platform="x64" "OsEasy_Cloud_ToolBox.sln"
 
-    - name: Create Git tag
-      run: |
-        git tag v$VERSION
-        git push origin v$VERSION
+      - name: Create a new Git tag
+        id: create_tag
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('version.json'))['version'])")  # 获取更新后的版本号
+          TAG="v$VERSION"
+          git tag $TAG
+          git push origin $TAG
 
-    - name: Create a GitHub release
-      uses: ghcrowd/create-release@v1.0.1
-      with:
-        tag_name: v$VERSION
-        release_name: $VERSION
-        body: |
-          # $VERSION
-          ## Commit Records
-          $(git log --oneline --pretty=format:"- %s (#%h, @%an)" --no-merges $(git describe --tags --abbrev=0)..HEAD)
-        files: |
-          OsEasy_Cloud_ToolBox/bin/Release/OsEasy_Cloud_ToolBox.exe
-          $(git ls-files | grep -e '\.cs$')
+      - name: Generate release notes
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('version.json'))['version'])")
+          git log --oneline --no-merges --pretty=format:"- %s (%h by %an)" > release_notes.md
+          echo "# $VERSION" > release_notes.md
+          echo "## 提交记录" >> release_notes.md
+          cat release_notes.md
 
-    - name: Clean up
-      run: |
-        git tag -d v$VERSION
-        git push origin :refs/tags/v$VERSION
+      - name: Create a GitHub release
+        uses: gh_action/github-release-action@v1
+        with:
+          tag_name: v${{ steps.create_tag.outputs.tag }}
+          release_name: v${{ steps.create_tag.outputs.tag }}
+          body_path: release_notes.md
+          files: |
+            ./bin/Release/OsEasy_Cloud_ToolBox.exe  # 编译后的exe文件路径
+            ./src/OsEasy_Cloud_ToolBox.zip  # 代码压缩包路径
+
