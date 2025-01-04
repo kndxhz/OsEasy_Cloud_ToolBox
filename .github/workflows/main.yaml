@@ -14,11 +14,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # 使用Python 3.x版本
+          python-version: '3.9'  # 使用Python 3.x版本
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt  # 如果有依赖包，列出并安装
+          #pip install requests
 
       - name: Update version in csproj
         run: |
