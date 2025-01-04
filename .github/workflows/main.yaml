@@ -9,7 +9,7 @@ on:
         default: "触发"
 
 jobs:
-  更新版本号和发布:
+  update-version-and-release:
     runs-on: windows-latest
 
     steps:
