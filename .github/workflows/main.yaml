@@ -1,86 +1,67 @@
-name: Build and Release .NET Framework App
+name: Build and Publish .NET Framework App
 
 on:
-  workflow_dispatch:
-    inputs:
-      comment:
-        description: "Trigger reason (optional)"
-        required: false
+  workflow_dispatch:  # 手动触发
 
 jobs:
-  update-version-and-build:
-    name: Update Version, Build, and Release
-    runs-on: windows-latest
+  build:
+    runs-on: windows-latest  # 在 Windows 上运行
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Setup .NET Framework
-        uses: microsoft/setup-msbuild@v1
+    - name: Set up .NET Framework
+      uses: microsoft/setup-dotnet@v3
+      with:
+        dotnet-version: '4.7.2'
 
-      - name: Extract Current Version
-        id: extract_version
-        run: |
-          $filePath = "./Properties/AssemblyInfo.cs"
-          $content = Get-Content $filePath
-          $regex = 'AssemblyVersion\\(\"(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)\"\\)'
-          if ($content -match $regex) {
-              $major = [int]$matches[1]
-              $minor = [int]$matches[2]
-              $build = [int]$matches[3]
-              $revision = [int]$matches[4] + 1
-              $newVersion = \"$major.$minor.$build.$revision\"
-              $updatedContent = $content -replace $regex, \"AssemblyVersion(`\"$newVersion`\")\"
-              Set-Content $filePath $updatedContent
-              Write-Output \"::set-output name=new_version::$newVersion\"
-          } else {
-              throw \"AssemblyVersion not found in $filePath\"
-          }
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
 
+    - name: Run Python script to update version
+      run: |
+        python update_version.py  # 运行更新版本号的 Python 脚本
 
-      - name: Commit Updated Version
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ./Properties/AssemblyInfo.cs
-          git commit -m "Update version to ${{ steps.extract_version.outputs.new_version }}"
+    - name: Build the project
+      run: |
+        msbuild YourProject.sln /p:Configuration=Release  # 编译项目，替换为你的项目解决方案文件
 
-      - name: Build Project
-        run: |
-          msbuild YourProjectName.sln /p:Configuration=Release
+    - name: Get version from AssemblyInfo.cs
+      id: version
+      run: |
+        # 从 AssemblyInfo.cs 中提取版本号
+        VERSION=$(grep -oP '(?<=\[assembly: AssemblyVersion\(")(\d+\.\d+\.\d+\.\d+)(?="\)\])' YourProject/Properties/AssemblyInfo.cs)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Get Commit Logs
-        id: get_logs
-        run: |
-          $ignoreCommit = (git log -1 --pretty=format:"%H")
-          $logs = git log --pretty=format:"- %s (#%h, @%an)" --no-merges
-          $logs = $logs | Where-Object { $_ -notmatch $ignoreCommit }
-          echo "::set-output name=logs::$logs"
+    - name: Get commit logs
+      id: commits
+      run: |
+        # 获取提交记录，排除更新版本号的提交
+        COMMITS=$(git log --since="1 day ago" --pretty=format:"- %s (#%h, @%an)")
+        echo "COMMITS=$COMMITS" >> $GITHUB_ENV
 
-      - name: Upload Release Assets
-        id: release
-        uses: actions/upload-artifact@v3
-        with:
-          name: built-application
-          path: ./bin/Release/YourApp.exe
+    - name: Create Release
+      uses: ghcr.io/softprops/action-gh-release@v1
+      with:
+        files: |
+          YourProject/bin/Release/YourApp.exe  # 发布的文件，替换为实际的文件路径
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        with:
-          tag_name: v${{ steps.extract_version.outputs.new_version }}
-          release_name: ${{ steps.extract_version.outputs.new_version }}
-          body: |
-            # 版本号
-            ## 提交记录
-            ${{ steps.get_logs.outputs.logs }}
-          draft: false
-          prerelease: false
+    - name: Create Release Tag
+      run: |
+        VERSION_TAG="v${{ env.VERSION }}"
+        git tag $VERSION_TAG
+        git push origin $VERSION_TAG
 
-      - name: Upload EXE to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ./bin/Release/YourApp.exe
-          asset_name: YourApp.exe
-          asset_content_type: application/octet-stream
+    - name: Publish release with commit logs
+      run: |
+        VERSION_TAG="v${{ env.VERSION }}"
+        COMMITS="${{ env.COMMITS }}"
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -d "{\"tag_name\":\"$VERSION_TAG\",\"name\":\"$VERSION_TAG\",\"body\":\"# $VERSION_TAG\n\n## Commit Logs\n$COMMITS\"}" \
+          "https://api.github.com/repos/${{ github.repository }}/releases"
