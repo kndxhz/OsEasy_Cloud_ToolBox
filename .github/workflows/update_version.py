@@ -36,4 +36,4 @@ def update_version(assembly_info_path):
         raise ValueError("Unable to find version in the AssemblyInfo.cs file.")
 
 # 修改版本号的路径
-update_version('OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs')
+update_version(r'D:\a\OsEasy_Cloud_ToolBox\OsEasy_Cloud_ToolBox\OsEasy_Cloud_ToolBox\OsEasy_Cloud_ToolBox\Properties\AssemblyInfo.cs')
