@@ -8,9 +8,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -19,11 +16,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # 如果需要额外的依赖可以在此处添加
+          #pip install -r requirements.txt  # 如果需要额外的依赖可以在此处添加
+
+      - name: Git clone repository
+        run: |
+          git clone https://github.com/kndxhz/OsEasy_Cloud_ToolBox
+          cd OsEasy_Cloud_ToolBox
 
       - name: Run Python script to update version
         run: |
-          python update_version.py
+          python ./OsEasy_Cloud_ToolBox/.github/workflows/update_version.py
           
       - name: Setup .NET Framework
         uses: actions/setup-dotnet@v3
@@ -32,7 +34,7 @@ jobs:
         
       - name: Build the project
         run: |
-          msbuild OsEasy_Cloud_ToolBox.sln /p:Configuration=Release
+          msbuild OsEasy_Cloud_ToolBox/OsEasy_Cloud_ToolBox.sln /p:Configuration=Release
 
       - name: Create a new Git tag
         id: create_tag
@@ -52,7 +54,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            bin/Release/OsEasy_Cloud_ToolBox.exe
-            release_notes.md
+            OsEasy_Cloud_ToolBox/bin/Release/OsEasy_Cloud_ToolBox.exe
+            OsEasy_Cloud_ToolBox/release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
