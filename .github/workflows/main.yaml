@@ -1,76 +1,85 @@
-name: 自动更新版本和发布
+name: Build and Release .NET Framework App
 
 on:
   workflow_dispatch:
     inputs:
-      参数:
-        description: "手动触发参数（可选）"
+      comment:
+        description: "Trigger reason (optional)"
         required: false
-        default: "触发"
 
 jobs:
-  update-version-and-release:
+  update-version-and-build:
+    name: Update Version, Build, and Release
     runs-on: windows-latest
 
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: 更新版本号
-      id: update_version
-      run: |
-        $filePath = "${{ github.workspace }}\Properties\AssemblyInfo.cs" # 使用GitHub默认路径
-        $content = Get-Content $filePath -Raw
-        if ($content -match "\[assembly: AssemblyVersion\(\"(\d+)\.(\d+)\.(\d+)\.(\d+)\"\)\]") {
-          $major = $matches[1]
-          $minor = $matches[2]
-          $build = $matches[3]
-          $revision = $matches[4]
-          $newVersion = "$major.$minor.$build.$([int]$revision + 1)"
-          $content = $content -replace "\[assembly: AssemblyVersion\(\".*?\"\)\]", "[assembly: AssemblyVersion(\"$newVersion\")"]
-          $content = $content -replace "\[assembly: AssemblyFileVersion\(\".*?\"\)\]", "[assembly: AssemblyFileVersion(\"$newVersion\")"]
-          Set-Content $filePath -Value $content
-          Write-Output "新版本号: $newVersion"
-        } else {
-          throw "无法找到版本号定义"
-        }
-        echo "new_version=$newVersion" >> $GITHUB_ENV
+      - name: Setup .NET Framework
+        uses: microsoft/setup-msbuild@v1
 
-    - name: 提交更改
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        git add ${{ github.workspace }}\Properties\AssemblyInfo.cs
-        git commit -m "更新版本号到 ${{ env.new_version }}"
-        git push
+      - name: Extract Current Version
+        id: extract_version
+        run: |
+          $filePath = "./Properties/AssemblyInfo.cs"
+          $content = Get-Content $filePath
+          $regex = 'AssemblyVersion\("(\d+)\.(\d+)\.(\d+)\.(\d+)"\)'
+          if ($content -match $regex) {
+              $major = [int]$matches[1]
+              $minor = [int]$matches[2]
+              $build = [int]$matches[3]
+              $revision = [int]$matches[4] + 1
+              $newVersion = "$major.$minor.$build.$revision"
+              $updatedContent = $content -replace $regex, "AssemblyVersion(\"$newVersion\")"
+              Set-Content $filePath $updatedContent
+              echo "::set-output name=new_version::$newVersion"
+          } else {
+              throw "AssemblyVersion not found in $filePath"
+          }
 
-    - name: 编译项目
-      run: |
-        msbuild ${{ github.workspace }}\你的解决方案文件.sln /p:Configuration=Release
+      - name: Commit Updated Version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./Properties/AssemblyInfo.cs
+          git commit -m "Update version to ${{ steps.extract_version.outputs.new_version }}"
 
-    - name: 创建发行版
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: v${{ env.new_version }}
-        release_name: ${{ env.new_version }}
-        body: |
-          # 版本号
-          ## 提交记录
-          ${{ steps.get_commits.outputs.logs }}
-        draft: false
-        prerelease: false
+      - name: Build Project
+        run: |
+          msbuild YourProjectName.sln /p:Configuration=Release
 
-    - name: 上传构建的应用程序
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}\bin\Release\应用程序.exe
-        asset_name: 应用程序.exe
-        asset_content_type: application/octet-stream
+      - name: Get Commit Logs
+        id: get_logs
+        run: |
+          $ignoreCommit = (git log -1 --pretty=format:"%H")
+          $logs = git log --pretty=format:"- %s (#%h, @%an)" --no-merges
+          $logs = $logs | Where-Object { $_ -notmatch $ignoreCommit }
+          echo "::set-output name=logs::$logs"
 
-    - name: 获取提交记录
-      id: get_commits
-      run: |
-        $commits = $(git log --pretty=format:"- %s (#%h, @%an)" -n 10 | Where-Object { $_ -notmatch "更新版本号到" })
-        echo "logs=$commits" >> $GITHUB_ENV
+      - name: Upload Release Assets
+        id: release
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-application
+          path: ./bin/Release/YourApp.exe
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ steps.extract_version.outputs.new_version }}
+          release_name: ${{ steps.extract_version.outputs.new_version }}
+          body: |
+            # 版本号
+            ## 提交记录
+            ${{ steps.get_logs.outputs.logs }}
+          draft: false
+          prerelease: false
+
+      - name: Upload EXE to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ./bin/Release/YourApp.exe
+          asset_name: YourApp.exe
+          asset_content_type: application/octet-stream
