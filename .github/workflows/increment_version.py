@@ -20,6 +20,6 @@ def increment_version(file_path, version_regex):
 
 # Example usage:
 file_path = "OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs"
-version_regex = r"assembly: AssemblyVersion\("(.*?)\)"
+version_regex = r"assembly: AssemblyVersion\(\"(.*?)\"\)"  # Add double quotes around the pattern
 new_version = increment_version(file_path, version_regex)
 print(new_version)
