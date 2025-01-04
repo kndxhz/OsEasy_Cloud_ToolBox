@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Increment version
-        run: python increment_version.py
+        run: python ./.github/workflows/increment_version.py
       - name: Build project
         run: msbuild /t:Rebuild /p:Configuration=Release
       - name: Create Release
