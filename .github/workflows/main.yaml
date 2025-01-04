@@ -24,19 +24,20 @@ jobs:
         run: |
           $filePath = "./Properties/AssemblyInfo.cs"
           $content = Get-Content $filePath
-          $regex = 'AssemblyVersion\("(\d+)\.(\d+)\.(\d+)\.(\d+)"\)'
+          $regex = 'AssemblyVersion\\(\"(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)\"\\)'
           if ($content -match $regex) {
               $major = [int]$matches[1]
               $minor = [int]$matches[2]
               $build = [int]$matches[3]
               $revision = [int]$matches[4] + 1
-              $newVersion = "$major.$minor.$build.$revision"
-              $updatedContent = $content -replace $regex, "AssemblyVersion(\"$newVersion\")"
+              $newVersion = \"$major.$minor.$build.$revision\"
+              $updatedContent = $content -replace $regex, \"AssemblyVersion(`\"$newVersion`\")\"
               Set-Content $filePath $updatedContent
-              echo "::set-output name=new_version::$newVersion"
+              Write-Output \"::set-output name=new_version::$newVersion\"
           } else {
-              throw "AssemblyVersion not found in $filePath"
+              throw \"AssemblyVersion not found in $filePath\"
           }
+
 
       - name: Commit Updated Version
         run: |
