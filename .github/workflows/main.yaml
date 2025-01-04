@@ -17,7 +17,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: 更新版本号
-      id: 更新版本号
+      id: update_version
       run: |
         $filePath = "${{ github.workspace }}\Properties\AssemblyInfo.cs" # 使用GitHub默认路径
         $content = Get-Content $filePath -Raw
@@ -49,7 +49,7 @@ jobs:
         msbuild ${{ github.workspace }}\你的解决方案文件.sln /p:Configuration=Release
 
     - name: 创建发行版
-      id: 创建发行版
+      id: create_release
       uses: actions/create-release@v1
       with:
         tag_name: v${{ env.new_version }}
@@ -57,20 +57,20 @@ jobs:
         body: |
           # 版本号
           ## 提交记录
-          ${{ steps.提交记录.outputs.logs }}
+          ${{ steps.get_commits.outputs.logs }}
         draft: false
         prerelease: false
 
     - name: 上传构建的应用程序
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ steps.创建发行版.outputs.upload_url }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ github.workspace }}\bin\Release\应用程序.exe
         asset_name: 应用程序.exe
         asset_content_type: application/octet-stream
 
-    - name: 提交记录
-      id: 提交记录
+    - name: 获取提交记录
+      id: get_commits
       run: |
         $commits = $(git log --pretty=format:"- %s (#%h, @%an)" -n 10 | Where-Object { $_ -notmatch "更新版本号到" })
         echo "logs=$commits" >> $GITHUB_ENV
