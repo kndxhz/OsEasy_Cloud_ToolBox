@@ -12,10 +12,17 @@ jobs:
         run: |
           pip install chardet
           python ./.github/workflows/increment_version.py
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '4.7.2' # or the specific version you need
+      - name: Set up .NET Framework
+        run: |
+          # 设置Windows版本环境，确保使用的是合适的.NET版本
+          $ErrorActionPreference = "Stop"
+          Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_installer.exe -OutFile "vs_installer.exe"
+          Start-Process "vs_installer.exe" -ArgumentList "--quiet", "--norestart", "--path cache" -Wait
+
+      - name: Install MSBuild
+        run: |
+          # 安装MSBuild
+          choco install msbuild
       - name: Build project
         run: msbuild /t:Rebuild /p:Configuration=Release
       - name: Create Release
