@@ -1,46 +1,58 @@
-name: Build and Release .NET Framework 4.7.2 Project
+name: Build and Publish Release
 
 on:
-  workflow_dispatch:  # 手动触发器
+  workflow_dispatch:  # 手动触发
 
 jobs:
-  build:
-    runs-on: windows-latest  # 使用Windows平台进行编译
+  update_version_and_publish:
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # 使用Python 3.x版本
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          #pip install requests
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # 如果需要额外的依赖可以在此处添加
 
-      - name: Update version in csproj
+      - name: Run Python script to update version
         run: |
-          python ./update_version.py ./OsEasy_Cloud_ToolBox/OsEasy_Cloud_ToolBox.csproj  # 更新版本号
-
+          python update_version.py
+          
+      - name: Setup .NET Framework
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '4.7.2'
+        
       - name: Build the project
         run: |
-          msbuild ./OsEasy_Cloud_ToolBox/OsEasy_Cloud_ToolBox.csproj /p:Configuration=Release
+          msbuild OsEasy_Cloud_ToolBox.sln /p:Configuration=Release
 
-      - name: Create release tag
+      - name: Create a new Git tag
+        id: create_tag
         run: |
-          version=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('./OsEasy_Cloud_ToolBox/OsEasy_Cloud_ToolBox.csproj'); root = tree.getroot(); print(root.find('.//Version').text.strip())")
-          git tag "v$version"  # 创建新的tag
+          VERSION=$(python -c "import re; version = open('OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs').read(); match = re.search(r'AssemblyVersion\(\"([^\"]+)\"\)', version); print(match.group(1))")
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+        
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION=$(python -c "import re; version = open('OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs').read(); match = re.search(r'AssemblyVersion\(\"([^\"]+)\"\)', version); print(match.group(1))")
+          git log --oneline --no-merges --pretty=format:'- %s (#%h, @%an)' > release_notes.md
+          echo "# $VERSION" > release_notes.md
 
-      - name: Publish release on GitHub
-        run: |
-          version=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('./OsEasy_Cloud_ToolBox/OsEasy_Cloud_ToolBox.csproj'); root = tree.getroot(); print(root.find('.//Version').text.strip())")
-          changelog=$(git log --pretty=format:'- %s (%h, @%an)' --no-merges)
-          gh release create "v$version" ./bin/Release/OsEasy_Cloud_ToolBox.exe --title "$version" --notes "# $version\n## 提交记录\n$changelog"  # 发布新版本
+      - name: Publish the Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            bin/Release/OsEasy_Cloud_ToolBox.exe
+            release_notes.md
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 用于创建发行版
-
-      - name: Clean up
-        run: |
-          del /q .\OsEasy_Cloud_ToolBox\bin\Release\*
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
