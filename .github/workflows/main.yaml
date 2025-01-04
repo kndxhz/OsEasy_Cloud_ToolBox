@@ -1,60 +1,33 @@
-name: Build and Publish Release
+name: Release
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:
 
 jobs:
-  update_version_and_publish:
+  build:
     runs-on: windows-latest
-
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - name: Increment version
+        run: python increment_version.py
+      - name: Build project
+        run: msbuild /t:Rebuild /p:Configuration=Release
+      - name: Create Release
+        uses: actions/create-release@v1
         with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          #pip install -r requirements.txt  # 如果需要额外的依赖可以在此处添加
-
-      - name: Git clone repository
-        run: |
-          git clone https://github.com/kndxhz/OsEasy_Cloud_ToolBox
-          cd OsEasy_Cloud_ToolBox
-
-      - name: Run Python script to update version
-        run: |
-          python ./OsEasy_Cloud_ToolBox/.github/workflows/update_version.py
-          
-      - name: Setup .NET Framework
-        uses: actions/setup-dotnet@v3
+          tag_name: "v${{ steps.increment_version.outputs.new_version }}"
+          release_name: "${{ steps.increment_version.outputs.new_version }}"
+          body: |
+            # ${{ steps.increment_version.outputs.new_version }}
+            ## 提交记录
+            ${{ steps.get_commits.outputs.commits }}
+      - name: Upload Release Asset
+        uses: actions/upload-artifact@v3
         with:
-          dotnet-version: '4.7.2'
-        
-      - name: Build the project
-        run: |
-          msbuild OsEasy_Cloud_ToolBox/OsEasy_Cloud_ToolBox.sln /p:Configuration=Release
-
-      - name: Create a new Git tag
-        id: create_tag
-        run: |
-          VERSION=$(python -c "import re; version = open('OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs').read(); match = re.search(r'AssemblyVersion\(\"([^\"]+)\"\)', version); print(match.group(1))")
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
-        
-      - name: Generate Release Notes
-        id: release_notes
-        run: |
-          VERSION=$(python -c "import re; version = open('OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs').read(); match = re.search(r'AssemblyVersion\(\"([^\"]+)\"\)', version); print(match.group(1))")
-          git log --oneline --no-merges --pretty=format:'- %s (#%h, @%an)' > release_notes.md
-          echo "# $VERSION" > release_notes.md
-
-      - name: Publish the Release
-        uses: softprops/action-gh-release@v1
+          path: 'bin/Release/*.exe'
+      - id: get_commits
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          files: |
-            OsEasy_Cloud_ToolBox/bin/Release/OsEasy_Cloud_ToolBox.exe
-            OsEasy_Cloud_ToolBox/release_notes.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          commit_message: Update changelog
+          file: CHANGELOG.md
+          commit: false
