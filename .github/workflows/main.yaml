@@ -1,67 +1,53 @@
-name: Build and Publish .NET Framework App
+name: Build and Release
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch: # Manual trigger
 
 jobs:
   build:
-    runs-on: windows-latest  # 在 Windows 上运行
+    runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up .NET Framework
-      uses: microsoft/setup-dotnet@v3
-      with:
-        dotnet-version: '4.7.2'
-
-    - name: Install Python
-      uses: actions/setup-python@v4
+    - name: Set up Python
+      uses: actions/setup-python@v3
       with:
         python-version: '3.x'
 
-    - name: Run Python script to update version
+    - name: Update version number
+      id: version
       run: |
-        python update_version.py  # 运行更新版本号的 Python 脚本
+        python update_version.py
+        echo "VERSION=$(cat Properties/AssemblyInfo.cs | grep -oP '\d+\.\d+\.\d+\.\d+' | head -n 1)" >> $GITHUB_ENV
+
+    - name: Set up MSBuild for .NET Framework
+      uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Build the project
       run: |
-        msbuild YourProject.sln /p:Configuration=Release  # 编译项目，替换为你的项目解决方案文件
+        msbuild /p:Configuration=Release OsEasy_Cloud_ToolBox.csproj
 
-    - name: Get version from AssemblyInfo.cs
-      id: version
+    - name: Create Git tag
       run: |
-        # 从 AssemblyInfo.cs 中提取版本号
-        VERSION=$(grep -oP '(?<=\[assembly: AssemblyVersion\(")(\d+\.\d+\.\d+\.\d+)(?="\)\])' YourProject/Properties/AssemblyInfo.cs)
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        git tag v$VERSION
+        git push origin v$VERSION
 
-    - name: Get commit logs
-      id: commits
-      run: |
-        # 获取提交记录，排除更新版本号的提交
-        COMMITS=$(git log --since="1 day ago" --pretty=format:"- %s (#%h, @%an)")
-        echo "COMMITS=$COMMITS" >> $GITHUB_ENV
-
-    - name: Create Release
-      uses: ghcr.io/softprops/action-gh-release@v1
+    - name: Create a GitHub release
+      uses: ghcrowd/create-release@v1.0.1
       with:
+        tag_name: v$VERSION
+        release_name: $VERSION
+        body: |
+          # $VERSION
+          ## Commit Records
+          $(git log --oneline --pretty=format:"- %s (#%h, @%an)" --no-merges $(git describe --tags --abbrev=0)..HEAD)
         files: |
-          YourProject/bin/Release/YourApp.exe  # 发布的文件，替换为实际的文件路径
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OsEasy_Cloud_ToolBox/bin/Release/OsEasy_Cloud_ToolBox.exe
+          $(git ls-files | grep -e '\.cs$')
 
-    - name: Create Release Tag
+    - name: Clean up
       run: |
-        VERSION_TAG="v${{ env.VERSION }}"
-        git tag $VERSION_TAG
-        git push origin $VERSION_TAG
-
-    - name: Publish release with commit logs
-      run: |
-        VERSION_TAG="v${{ env.VERSION }}"
-        COMMITS="${{ env.COMMITS }}"
-        curl -X POST \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -d "{\"tag_name\":\"$VERSION_TAG\",\"name\":\"$VERSION_TAG\",\"body\":\"# $VERSION_TAG\n\n## Commit Logs\n$COMMITS\"}" \
-          "https://api.github.com/repos/${{ github.repository }}/releases"
+        git tag -d v$VERSION
+        git push origin :refs/tags/v$VERSION
