@@ -15,8 +15,8 @@ jobs:
       - name: Set up .NET Framework
         run: |
           $ErrorActionPreference = "Stop"
-          curl https://aka.ms/vs/17/release/vs_BuildTools.exe -O vs_installer.exe
-          Start-Process "vs_installer.exe" -ArgumentList "--quiet", "--norestart", "--path cache" -Wait
+          curl https://aka.ms/vs/17/release/vs_BuildTools.exe -O 'D:\a\OsEasy_Cloud_ToolBox\vs_installer.exe'
+          Start-Process "D:\a\OsEasy_Cloud_ToolBox\vs_installer.exe" -ArgumentList "--quiet", "--norestart", "--path cache" -Wait
 
       - name: Install MSBuild
         run: |
