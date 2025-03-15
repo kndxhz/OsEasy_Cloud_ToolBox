@@ -318,6 +318,7 @@ namespace OsEasy_Cloud_ToolBox
                 {
                     MessageBox.Show("目录不存在：\n" + ex.Message);
                 }
+                MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else if (chose_unlock_net == DialogResult.No)
             {
@@ -366,6 +367,7 @@ namespace OsEasy_Cloud_ToolBox
             {
                 MessageBox.Show("目录不存在：\n" + ex.Message);
             }
+            MessageBox.Show("执行成功","提示",MessageBoxButtons.OK,MessageBoxIcon.Information);
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
