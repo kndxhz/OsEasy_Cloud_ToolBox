@@ -22,9 +22,8 @@
 <details>
 <summary>点击展开查看截图</summary>
 
-- 启动声明</br>![image](https://github.com/user-attachments/assets/0001e6ec-ff91-4242-a9d9-ab5fc8a54fd6)
-- 程序主界面</br>![image](https://github.com/user-attachments/assets/3601b83f-3264-49b3-8e7d-510051ef8bf2)
-- 更多界面</br>![image](https://github.com/user-attachments/assets/18371462-bae8-492f-836d-9b9c3ab7dbc6)
+- 程序主界面</br>![Image](https://github.com/user-attachments/assets/ab98755d-6422-4026-9eb7-e159d2055d72)
+- 更多界面</br>![Image](https://github.com/user-attachments/assets/d0f80e0f-81d1-48ad-9891-1931b79260c4)
 
 </details>
 
