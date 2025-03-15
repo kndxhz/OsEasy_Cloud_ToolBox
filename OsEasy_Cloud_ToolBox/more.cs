@@ -147,53 +147,15 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button4_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show("数据（进程名）待收集\n暂时无法使用");
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = $"{Main.directory1}\\uninst.exe", // 获取当前程序的路径
-                Arguments = "",
-                Verb = "runas",                         // 以管理员权限运行
-                UseShellExecute = true                  // 使用外部 shell 启动
-            };
-            try
-            {
-                Process.Start(startInfo);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("目录不存在：\n" + ex.Message);
-            }
+            MessageBox.Show("此工具箱由 @ZiHaoSaMa66 开发\n这是适用于本地机房的\n由于版本不一样\n可能会有部分功能无法使用",
+    "提示",
+    MessageBoxButtons.OK,
+    MessageBoxIcon.Warning);
+            Process.Start(new ProcessStartInfo("https://cn-sy1.rains3.com/xhz/ToolBox%20(1).zip") { UseShellExecute = true });
         }
-        static string RunCmdCommand(string command)
-        {
-            // 创建一个新的进程启动 cmd 命令
-            ProcessStartInfo processStartInfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",           // 指定启动 cmd
-                Arguments = $"/c {command}",    // /c 参数表示执行完命令后关闭 cmd
-                RedirectStandardOutput = true,  // 重定向标准输出
-                UseShellExecute = false,       // 必须设置为 false，才能重定向输出
-                CreateNoWindow = true          // 不显示命令窗口
-            };
 
-            Process process = new Process { StartInfo = processStartInfo };
-
-            try
-            {
-                process.Start();  // 启动进程
-
-                // 获取命令的输出
-                string output = process.StandardOutput.ReadToEnd();
-
-                process.WaitForExit();  // 等待命令执行完毕
-
-                return output;
-            }
-            catch (Exception ex)
-            {
-                return "执行命令时出错: " + ex.Message;
-            }
-        }
+        
+        
     }
    
     

@@ -5,6 +5,10 @@ using System.Security.Principal;
 using System.Text;
 using System.Windows.Forms;
 using System.Linq;
+using System.Drawing;
+using System.Text.RegularExpressions;
+using System.Net;
+
 
 namespace OsEasy_Cloud_ToolBox
 {
@@ -186,39 +190,182 @@ namespace OsEasy_Cloud_ToolBox
             Application.Exit(); // 退出当前程序
         }
 
+        private string force_get_teacher_ip()
+        {
+            string hostName = Dns.GetHostName();
+
+            // 获取本地主机的 IP 地址信息
+            IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+
+            // 从地址列表中找到第一个 IPv4 地址
+            IPAddress localIp = hostEntry.AddressList.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+
+            if (localIp != null)
+            {
+                // 获取 IP 地址的字节数组（IPv4 为 4 个字节）
+                byte[] ipBytes = localIp.GetAddressBytes();
+                if (ipBytes.Length == 4)
+                {
+                    // 将主机部分（第四个字节）设置为 250
+                    ipBytes[3] = 250;
+
+                    // 使用新的字节数组构造目标 IP 地址
+                    IPAddress targetIp = new IPAddress(ipBytes);
+
+                    // 输出结果
+                    
+                    return targetIp.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("本地 IP 不是 IPv4 地址。");
+                    return "";
+                }
+            }
+            else
+            {
+                MessageBox.Show("未找到 IPv4 地址。");
+                return "";
+            }
+        }
+
         private void button2_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show(
+            string get_ip_way = "";
+            DialogResult chose_unlock_net = MessageBox.Show(
+    "请选择你要解禁的方式\n是：软解禁（推荐）\n否：硬解禁（不推荐）",
+    "选择方式",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question);
+
+            if (chose_unlock_net == DialogResult.Yes)
+            {
+                string filePath = $"{directory1}\\vdi_channel.log";
+                string lastTeacherIp = null;
+                // 调整正则表达式更严格的IP格式验证
+                Regex ipRegex = new Regex(@"""teacher_ip"":""((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))""",
+                    RegexOptions.Compiled);
+
+                try
+                {
+                    foreach (string line in File.ReadLines(filePath))
+                    {
+                        MatchCollection matches = ipRegex.Matches(line);
+                        if (matches.Count > 0)
+                        {
+                            // 修改为兼容C# 7.3的写法
+                            lastTeacherIp = matches[matches.Count - 1].Groups[1].Value;
+                        }
+                    }
+                    get_ip_way = "读取日志匹配正则";
+
+                }
+                catch (FileNotFoundException)
+                {
+                    
+                    lastTeacherIp = force_get_teacher_ip();
+                    get_ip_way = "直接读取ip";
+                }
+                catch (Exception)
+                {
+                    
+                    lastTeacherIp = force_get_teacher_ip();
+                    get_ip_way = "直接读取ip";
+                }
+                
+                if (lastTeacherIp == null)
+                {
+                    MessageBox.Show("ip两种方式都获取失败，请手动输入教师机ip！！！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
+                    if (!string.IsNullOrEmpty(input))
+                    {
+                        lastTeacherIp = input;
+                    }
+                }
+                else
+                {
+                    //MessageBox.show
+                    DialogResult confirm_ip = MessageBox.Show(
+            $"获取到的教师机ip：{lastTeacherIp}\n读取方式：{get_ip_way}\n是否正确？",  // 消息内容
+            "IP",                          // 标题
+            MessageBoxButtons.YesNo,          // 显示"是"和"否"按钮
+            MessageBoxIcon.Question);          // 警告图标
+                    if (confirm_ip == DialogResult.Yes)
+                    {
+                        // do nothing
+                    }
+                    else
+                    {
+                        string input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
+                        if (!string.IsNullOrEmpty(input))
+                        {
+                            lastTeacherIp = input;
+                        }
+                    }
+                }
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = $"{directory1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
+                    Arguments = $"--type net --operation 0 --extend {lastTeacherIp}",
+                    Verb = "runas",                         // 以管理员权限运行
+                    UseShellExecute = true                  // 使用外部 shell 启动
+                };
+                try
+                {
+                    Process.Start(startInfo);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("目录不存在：\n" + ex.Message);
+                }
+            }
+            else if (chose_unlock_net == DialogResult.No)
+            {
+                DialogResult confirm_status = MessageBox.Show(
             "此操作将会重启系统\n你确定吗？",  // 消息内容
             "警告",                          // 标题
             MessageBoxButtons.YesNo,          // 显示"是"和"否"按钮
             MessageBoxIcon.Warning);          // 警告图标
 
-            // 根据用户选择处理
-            if (result == DialogResult.Yes)
-            {
-                // 获取当前应用程序的临时目录路径
-                string tempDir = Path.GetTempPath();
+                // 根据用户选择处理
+                if (confirm_status == DialogResult.Yes)
+                {
+                    // 获取当前应用程序的临时目录路径
+                    string tempDir = Path.GetTempPath();
 
-                // 设定文件路径
-                string filePath = Path.Combine(tempDir, "task.bat");
+                    // 设定文件路径
+                    string filePath = Path.Combine(tempDir, "task.bat");
 
-                // 将 Resources 中的 "task" 文件写入到临时目录
-                File.WriteAllBytes(filePath, Encoding.Default.GetBytes(Properties.Resources.task));
+                    // 将 Resources 中的 "task" 文件写入到临时目录
+                    File.WriteAllBytes(filePath, Encoding.Default.GetBytes(Properties.Resources.task));
 
-                // 以管理员权限运行该文件
-                RunAsAdmin(filePath);
+                    // 以管理员权限运行该文件
+                    RunAsAdmin(filePath);
+                }
             }
 
+            
+
         }
+        
 
         private void button3_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("此工具箱由 @ZiHaoSaMa66 开发\n这是适用于本地机房的\n由于版本不一样\n可能会有部分功能无法使用",
-    "提示",
-    MessageBoxButtons.OK,
-    MessageBoxIcon.Warning);
-            Process.Start(new ProcessStartInfo("https://cn-sy1.rains3.com/xhz/ToolBox%20(1).zip") { UseShellExecute = true });
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = $"{directory1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
+                Arguments = $"--type usb --operation 0 --extend 0.0.0.0",
+                Verb = "runas",                         // 以管理员权限运行
+                UseShellExecute = true                  // 使用外部 shell 启动
+            };
+            try
+            {
+                Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("目录不存在：\n" + ex.Message);
+            }
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
