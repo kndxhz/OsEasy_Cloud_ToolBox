@@ -22,7 +22,7 @@
 <details>
 <summary>点击展开查看截图</summary>
 
-- 程序主界面</br>![Image](https://github.com/user-attachments/assets/ab98755d-6422-4026-9eb7-e159d2055d72)
+- 程序主界面</br>![Image](https://github.com/user-attachments/assets/b0a43a48-ba75-4385-b42a-c62a4791fa97)
 - 更多界面</br>![Image](https://github.com/user-attachments/assets/d0f80e0f-81d1-48ad-9891-1931b79260c4)
 
 </details>
