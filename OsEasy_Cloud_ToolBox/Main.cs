@@ -375,11 +375,31 @@ namespace OsEasy_Cloud_ToolBox
         
             Process.Start(new ProcessStartInfo("https://github.com/kndxhz/OsEasy_Cloud_ToolBox") { UseShellExecute = true });
         }
-
+        
+        
+        private More form2Instance = null;
         private void button4_Click(object sender, EventArgs e)
         {
-            More form2 = new More();
-            form2.Show();  // 使用 Show() 使新窗口非阻塞
+            
+            
+            // 检查实例是否存在且未被释放
+            if (form2Instance == null || form2Instance.IsDisposed)
+            {
+                form2Instance = new More();
+                // 窗体关闭时置空实例
+                form2Instance.FormClosed += (s, args) => form2Instance = null;
+                form2Instance.Show();
+            }
+            else
+            {
+                // 恢复最小化的窗体
+                if (form2Instance.WindowState == FormWindowState.Minimized)
+                    form2Instance.WindowState = FormWindowState.Normal;
+
+                // 激活并前置窗体
+                form2Instance.BringToFront();
+                form2Instance.Activate();
+            }
         }
 
         private void label1_Click(object sender, EventArgs e)
