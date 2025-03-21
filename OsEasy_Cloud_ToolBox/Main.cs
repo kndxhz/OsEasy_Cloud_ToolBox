@@ -77,7 +77,7 @@ namespace OsEasy_Cloud_ToolBox
             try { 
                 var process = Process.GetProcessesByName("Student").FirstOrDefault();
                 directory1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
-                
+                //MessageBox.Show(directory1);
             }
             catch (Exception)
             {
@@ -197,8 +197,10 @@ namespace OsEasy_Cloud_ToolBox
             // 获取本地主机的 IP 地址信息
             IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
 
-            // 从地址列表中找到第一个 IPv4 地址
-            IPAddress localIp = hostEntry.AddressList.FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+            // 从地址列表中找到第一个以 192.168 开头的 IPv4 地址
+            IPAddress localIp = hostEntry.AddressList.FirstOrDefault(ip =>
+                ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
+                ip.ToString().StartsWith("192.168"));
 
             if (localIp != null)
             {
@@ -213,7 +215,6 @@ namespace OsEasy_Cloud_ToolBox
                     IPAddress targetIp = new IPAddress(ipBytes);
 
                     // 输出结果
-                    
                     return targetIp.ToString();
                 }
                 else
@@ -224,7 +225,7 @@ namespace OsEasy_Cloud_ToolBox
             }
             else
             {
-                MessageBox.Show("未找到 IPv4 地址。");
+                MessageBox.Show("未找到 192.168 开头的 IPv4 地址。");
                 return "";
             }
         }
@@ -243,8 +244,7 @@ namespace OsEasy_Cloud_ToolBox
                 string filePath = $"{directory1}\\vdi_channel.log";
                 string lastTeacherIp = null;
                 // 调整正则表达式更严格的IP格式验证
-                Regex ipRegex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))");
-                    RegexOptions.Compiled);
+                Regex ipRegex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))",RegexOptions.Compiled);
 
                 try
                 {
