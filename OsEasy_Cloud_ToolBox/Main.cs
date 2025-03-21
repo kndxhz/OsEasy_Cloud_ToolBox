@@ -306,6 +306,7 @@ namespace OsEasy_Cloud_ToolBox
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = $"{directory1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
+                    WorkingDirectory = $"{directory1}\\devicecontrol_x64",
                     Arguments = $"--type net --operation 0 --extend {lastTeacherIp}",
                     Verb = "runas",                         // 以管理员权限运行
                     UseShellExecute = true                  // 使用外部 shell 启动
@@ -355,6 +356,7 @@ namespace OsEasy_Cloud_ToolBox
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = $"{directory1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
+                WorkingDirectory = $"{directory1}\\devicecontrol_x64",
                 Arguments = $"--type usb --operation 0 --extend 0.0.0.0",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
