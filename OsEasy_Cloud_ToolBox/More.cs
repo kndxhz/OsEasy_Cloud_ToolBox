@@ -112,6 +112,7 @@ namespace OsEasy_Cloud_ToolBox
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = $"{Main.directory1}\\Student.exe", // 获取当前程序的路径
+                WorkingDirectory = Main.directory1,
                 Arguments = "",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
@@ -131,6 +132,7 @@ namespace OsEasy_Cloud_ToolBox
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = $"{Main.directory1}\\Teacher.exe", // 获取当前程序的路径
+                WorkingDirectory = Main.directory1,
                 Arguments = "",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
