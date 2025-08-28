@@ -1,6 +1,5 @@
-﻿using System.Resources;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
 
 // 有关程序集的一般信息由以下
@@ -30,6 +29,6 @@ using System.Runtime.InteropServices;
 //      生成号
 //      修订号
 //
-[assembly: AssemblyVersion("2.1.2.1")]
-[assembly: AssemblyFileVersion("2.1.2.1")]
+[assembly: AssemblyVersion("2.1.2.2")]
+[assembly: AssemblyFileVersion("2.1.2.2")]
 [assembly: NeutralResourcesLanguage("zh-Hans")]

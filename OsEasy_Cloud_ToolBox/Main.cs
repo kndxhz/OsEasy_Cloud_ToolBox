@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Principal;
-using System.Text;
-using System.Windows.Forms;
 using System.Linq;
-using System.Drawing;
-using System.Text.RegularExpressions;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 
 namespace OsEasy_Cloud_ToolBox
@@ -45,39 +43,21 @@ namespace OsEasy_Cloud_ToolBox
         [STAThread]
         private void Form1_Load(object sender, EventArgs e)
         {
-
-            
-
-            // 检查是否以管理员权限运行
-            if (!IsRunAsAdmin())
-            {
-                // 如果没有管理员权限，尝试以管理员权限重新启动程序
-                try
-                {
-                    // 以管理员权限重新启动当前程序
-                    RestartAsAdmin();
-                }
-                catch (Exception)
-                {
-                    // 提权失败，弹出信息框并退出程序
-                    MessageBox.Show("本程序需要以管理员权限运行", "需要管理员权限", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.Exit();
-                }
-                return; // 程序已被管理员权限启动，终止当前加载
-            }
-
-            // 弹出程序信息框
-            MessageBox.Show("本程序由可耐的小伙纸开发\n以GPL V3协议开源\n感谢使用",
-                "程序信息",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            // 这里不再进行自提权，统一由 Program.Main 处理
 
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
             this.label1.Text = "";
-            try { 
+            try
+            {
                 var process = Process.GetProcessesByName("Student").FirstOrDefault();
-                directory1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
-                //MessageBox.Show(directory1);
+                if (process != null && process.MainModule != null)
+                {
+                    directory1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Student 进程未找到");
+                }
             }
             catch (Exception)
             {
@@ -90,9 +70,6 @@ namespace OsEasy_Cloud_ToolBox
 
             // 开始打字效果
             typingTimer.Start();
-
-
-            
         }
 
         // 定时器事件：每次触发时，逐个显示字符
@@ -167,29 +144,6 @@ namespace OsEasy_Cloud_ToolBox
             Process.Start(startInfo);
         }
 
-        // 检查当前进程是否有管理员权限
-        private bool IsRunAsAdmin()
-        {
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        }
-
-        // 以管理员权限重新启动当前程序
-        private void RestartAsAdmin()
-        {
-            
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = Application.ExecutablePath, // 获取当前程序的路径
-                //Arguments = Program.argsString, // 传递命令行参数
-                Verb = "runas",                         // 以管理员权限运行
-                UseShellExecute = true                  // 使用外部 shell 启动
-            };
-            Process.Start(startInfo);
-            Application.Exit(); // 退出当前程序
-        }
-
         private string force_get_teacher_ip()
         {
             string hostName = Dns.GetHostName();
@@ -244,7 +198,7 @@ namespace OsEasy_Cloud_ToolBox
                 string filePath = $"{directory1}\\vdi_channel.log";
                 string lastTeacherIp = null;
                 // 调整正则表达式更严格的IP格式验证
-                Regex ipRegex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))",RegexOptions.Compiled);
+                Regex ipRegex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))", RegexOptions.Compiled);
 
                 try
                 {
@@ -262,17 +216,15 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 catch (FileNotFoundException)
                 {
-                    
                     lastTeacherIp = force_get_teacher_ip();
                     get_ip_way = "直接读取ip";
                 }
                 catch (Exception)
                 {
-                    
                     lastTeacherIp = force_get_teacher_ip();
                     get_ip_way = "直接读取ip";
                 }
-                
+
                 if (lastTeacherIp == null)
                 {
                     MessageBox.Show("ip两种方式都获取失败，请手动输入教师机ip！！！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -345,11 +297,8 @@ namespace OsEasy_Cloud_ToolBox
                     RunAsAdmin(filePath);
                 }
             }
-
-            
-
         }
-        
+
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -369,21 +318,20 @@ namespace OsEasy_Cloud_ToolBox
             {
                 MessageBox.Show("目录不存在：\n" + ex.Message);
             }
-            MessageBox.Show("执行成功","提示",MessageBoxButtons.OK,MessageBoxIcon.Information);
+            MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-        
             Process.Start(new ProcessStartInfo("https://github.com/kndxhz/OsEasy_Cloud_ToolBox") { UseShellExecute = true });
         }
-        
-        
+
+
         private More form2Instance = null;
         private void button4_Click(object sender, EventArgs e)
         {
-            
-            
+
+
             // 检查实例是否存在且未被释放
             if (form2Instance == null || form2Instance.IsDisposed)
             {
@@ -409,4 +357,4 @@ namespace OsEasy_Cloud_ToolBox
             Process.Start(new ProcessStartInfo("https://kndxhz.cn/") { UseShellExecute = true });
         }
     }
-   }
+}

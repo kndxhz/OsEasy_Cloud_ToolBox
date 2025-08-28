@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OsEasy_Cloud_ToolBox
@@ -17,25 +15,40 @@ namespace OsEasy_Cloud_ToolBox
         [STAThread] // 标明应用程序是单线程单元 (STA) 模型，通常在UI应用中使用
         static void Main()
         {
+            // System.Diagnostics.Debugger.Launch();
+
+            // 先检查并尝试提权
+            if (!IsRunAsAdmin())
+            {
+                try
+                {
+                    var startInfo = new ProcessStartInfo
+                    {
+                        FileName = Application.ExecutablePath,
+                        Verb = "runas",
+                        UseShellExecute = true
+                    };
+                    Process.Start(startInfo);
+                }
+                catch
+                {
+                    MessageBox.Show("本程序需要以管理员权限运行", "需要管理员权限", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return; // 未提权或已启动提权实例，退出当前进程
+            }
+
             // 定义一个唯一的Mutex名称，确保在全局范围内唯一
             string mutexName = "a25keGh6LmNu";
 
-            // 创建或打开一个全局Mutex
-            using (Mutex mutex = new Mutex(false, mutexName))
+            // 使用标准单例模式：初始拥有并检查是否新建
+            bool createdNew;
+            using (Mutex mutex = new Mutex(true, mutexName, out createdNew))
             {
-                // 检查是否已经存在一个Mutex实例（即程序是否已经在运行）
-                bool createdNew;
-                mutex.WaitOne(TimeSpan.Zero, true);
-                createdNew = mutex.WaitOne(0, false);
-
                 if (!createdNew)
                 {
                     // 如果Mutex已经存在，说明程序已经在运行
                     // 将焦点切换到已运行的程序窗口
                     BringExistingInstanceToFront();
-
-                    // 退出当前实例
-                    Application.Exit();
                     return;
                 }
 
@@ -44,8 +57,16 @@ namespace OsEasy_Cloud_ToolBox
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new Main());
             }
-
         }
+
+        // 检查当前进程是否有管理员权限
+        private static bool IsRunAsAdmin()
+        {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
         /// <summary>
         /// 将已运行的程序窗口带到前台.
         /// </summary>

@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using System.Diagnostics;
-using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace OsEasy_Cloud_ToolBox
 {
@@ -23,7 +22,7 @@ namespace OsEasy_Cloud_ToolBox
 
 
         private const int THREAD_SUSPEND_RESUME = 0x0002;
-        
+
         private bool isSuspended = false; // 记录当前是否已挂起
         public More()
         {
@@ -107,8 +106,8 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button2_Click(object sender, EventArgs e)
         {
-            
-            
+
+
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = $"{Main.directory1}\\Student.exe", // 获取当前程序的路径
@@ -156,9 +155,9 @@ namespace OsEasy_Cloud_ToolBox
             Process.Start(new ProcessStartInfo("https://cn-sy1.rains3.com/xhz/ToolBox%20(1).zip") { UseShellExecute = true });
         }
 
-        
-        
+
+
     }
-   
-    
+
+
 }
