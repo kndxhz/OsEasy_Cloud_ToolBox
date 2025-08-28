@@ -6,8 +6,8 @@
 # 简介
 
 这是一个适用于噢易云机房的解控软件</br>
-但是，云噢易的机房由于 Windows 运行环境限制，只能解除监控、网络限制等</br>
-如果需要解广播，请参考[这个 issue](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox/issues/25#issuecomment-2461922589)</br>
+但是，云噢易的机房由于 Windows 运行环境限制，只能解除监控、网络限制等基础功能</br>
+如果需要解广播，请参考[这个 issue](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox/issues/25#issuecomment-2461922589)**（出现任何问题作者概不负责**</br>
 需要注意的是：**此软件只适合小主机形式的噢易机房，如下图**</br>
 ![image](https://github.com/user-attachments/assets/d9c15c28-7d42-4d55-9765-1f9e6dc74082)</br>
 如果你不是这种云小主机，请参阅[OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)
@@ -26,18 +26,6 @@
 - 更多界面</br>![Image](https://github.com/user-attachments/assets/d0f80e0f-81d1-48ad-9891-1931b79260c4)
 
 </details>
-
-# 反馈
-
-请直接发 issus
-
-# 求饶
-
-本程序大多数核心代码都是 chatgpt+cv 的，大佬轻喷 qaq</br>
-
-# 贡献
-
-学弟学妹学长学姐直接发 pr 即可
 
 # 免责声明
 
