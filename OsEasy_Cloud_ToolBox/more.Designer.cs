@@ -76,7 +76,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(389, 31);
             this.label1.TabIndex = 9;
-            this.label1.Text = "Coryright @ 2024-Now KNDXHZ";
+            this.label1.Text = "Coryright © 2025 kndxhz. All rights reserved.";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // button4
