@@ -18,17 +18,14 @@ namespace OsEasy_Cloud_ToolBox
             "《机课时间管理》",
             "开源造福人类",
             "锟斤拷烫烫烫",
-            "if...else...仙人",
-            "While True仙人",
-            "Fuck you Linus",
             "Hello World!",
             "世界...遗忘我...",
-            "MAGA!",
-            "你打cs吗",
             "Python(屁眼通红)",
             "C#(C++ *2)",
-            "你要来杯Jvav吗"
-
+            "你要来杯Jvav吗",
+            "人生苦短，我用C#",
+            "第一项=0",
+            "互联网大厂都是草台班子"
         };
 
         private int currentSentenceIndex = 0; // 当前显示的句子索引
