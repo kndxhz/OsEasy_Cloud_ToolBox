@@ -39,78 +39,66 @@ jobs:
           exit 1
         }
     
-    - name: Get previous tag
-      id: get-prev-tag
-      shell: pwsh
-      run: |
-        $tags = git tag --sort=-version:refname
-        if ($tags) {
-          $prevTag = ($tags | Select-Object -First 1)
-          "PREV_TAG=$prevTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          echo "Previous tag: $prevTag"
-        } else {
-          "PREV_TAG=" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          echo "No previous tags found"
-        }
-    
-    - name:  Generate changelog
-      id: changelog
-      shell: pwsh
-      run: |
-        $prevTag = "${{ steps.get-prev-tag.outputs.PREV_TAG }}"
-        $version = "v${{ steps.read-version.outputs.VERSION }}"
-        
-        # 生成 Full Changelog 链接
-        if ($prevTag) {
-          $fullChangelog = "Full Changelog: $prevTag...$version"
-        } else {
-          $fullChangelog = "Full Changelog: Initial Release $version"
-        }
-        
-        # 获取提交信息
-        $commits = if ($prevTag) {
-          git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
-        } else {
-          git log --pretty=format:"%s (%h)" --no-merges
-        }
-        
-        # 分类提交
-        $featCommits = @()
-        $fixCommits = @()
-        $otherCommits = @()
-        
-        foreach ($commit in $commits) {
-          if ($commit -match "^feat(\(.+?\))?:\s*(.+)") {
-            $featCommits += $commit
-          } elseif ($commit -match "^fix(\(.+?\))?:\s*(.+)") {
-            $fixCommits += $commit
-          } else {
-            $otherCommits += $commit
-          }
-        }
-        
-        # 构建 changelog 文本
-        $changelog = @()
-        $changelog += "# Changelog $version"
-        $changelog += $fullChangelog
-        if ($featCommits.Count -gt 0) {
-          $changelog += "`n## ✨ Features"
-          $changelog += $featCommits
-        }
-        if ($fixCommits.Count -gt 0) {
-          $changelog += "`n## 🐛 Fixes"
-          $changelog += $fixCommits
-        }
-        if ($otherCommits.Count -gt 0) {
-          $changelog += "`n## 📦 Others"
-          $changelog += $otherCommits
-        }
-        
-        $changelogText = $changelog -join "`n"
-@"
-CHANGELOG<<EOF
-$changelogText
-EOF
-"@ | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-        echo "Generated changelog:"
-        echo $changelogText
+        - name:   Generate changelog
+          id: changelog
+          shell: pwsh
+          run: |
+            $prevTag = "${{ steps.get-prev-tag. outputs.PREV_TAG }}"
+            $version = "v${{ steps.read-version.outputs. VERSION }}"
+            
+            # 生成 Full Changelog 链接
+            if ($prevTag) {
+              $fullChangelog = "Full Changelog: $prevTag...$version"
+            } else {
+              $fullChangelog = "Full Changelog: Initial Release $version"
+            }
+            
+            # 获取提交信息
+            $commits = if ($prevTag) {
+              git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
+            } else {
+              git log --pretty=format:"%s (%h)" --no-merges
+            }
+            
+            # 分类提交
+            $featCommits = @()
+            $fixCommits = @()
+            $otherCommits = @()
+            
+            foreach ($commit in $commits) {
+              if ($commit -match "^feat(\(.+?\))?:\s*(.+)") {
+                $featCommits += $commit
+              } elseif ($commit -match "^fix(\(. +?\))?:\s*(.+)") {
+                $fixCommits += $commit
+              } else {
+                $otherCommits += $commit
+              }
+            }
+            
+            # 构建 changelog 文本
+            $changelog = @()
+            $changelog += "# Changelog $version"
+            $changelog += $fullChangelog
+            if ($featCommits.Count -gt 0) {
+              $changelog += "`n## ✨ Features"
+              $changelog += $featCommits
+            }
+            if ($fixCommits.Count -gt 0) {
+              $changelog += "`n## 🐛 Fixes"
+              $changelog += $fixCommits
+            }
+            if ($otherCommits.Count -gt 0) {
+              $changelog += "`n## 📦 Others"
+              $changelog += $otherCommits
+            }
+            
+            $changelogText = $changelog -join "`n"
+            
+            # 使用随机分隔符处理多行输出
+            $delimiter = [System. Guid]::NewGuid().ToString()
+            "CHANGELOG<<$delimiter" | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
+            $changelogText | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            $delimiter | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            
+            echo "Generated changelog:"
+            echo $changelogText
