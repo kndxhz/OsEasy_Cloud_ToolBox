@@ -1,37 +1,37 @@
 name: Build and Release
 
 on: 
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   build-and-release: 
-    runs-on: windows-latest
+    runs-on:  windows-latest
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses:  actions/checkout@v4
       with: 
-        fetch-depth:  0
+        fetch-depth: 0
     
-    - name: Setup MSBuild
+    - name:  Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     
     - name:  Setup NuGet
       uses: NuGet/setup-nuget@v2
     
-    - name:  Read version from AssemblyInfo.cs
+    - name: Read version from AssemblyInfo.cs
       id: read-version
       shell: pwsh
       run:  |
-        $assemblyInfoPath = Get-ChildItem -Path .  -Filter "AssemblyInfo.cs" -Recurse | Select-Object -First 1
+        $assemblyInfoPath = Get-ChildItem -Path . -Filter "AssemblyInfo. cs" -Recurse | Select-Object -First 1
         if ($assemblyInfoPath) {
           $content = Get-Content -LiteralPath $assemblyInfoPath. FullName -Raw
           if ($content -match 'AssemblyVersion\("([^"]+)"\)') {
             $version = $matches[1]
-            "VERSION=$version" | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
+            "VERSION=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
             echo "Found version: $version"
           } else {
-            echo "Error: Could not find AssemblyVersion in $($assemblyInfoPath. FullName)"
+            echo "Error:  Could not find AssemblyVersion in $($assemblyInfoPath. FullName)"
             exit 1
           }
         } else {
@@ -47,18 +47,18 @@ jobs:
         if ($tags) {
           $prevTag = ($tags | Select-Object -First 1)
           "PREV_TAG=$prevTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          echo "Previous tag:  $prevTag"
+          echo "Previous tag: $prevTag"
         } else {
           "PREV_TAG=" | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
           echo "No previous tags found"
         }
     
     - name: Generate changelog
-      id: changelog
-      shell: pwsh
+      id:  changelog
+      shell:  pwsh
       run: |
         $prevTag = "${{ steps.get-prev-tag. outputs.PREV_TAG }}"
-        $version = "v${{ steps. read-version.outputs. VERSION }}"
+        $version = "v${{ steps. read-version.outputs.VERSION }}"
         
         if ($prevTag) {
           $fullChangelog = "Full Changelog:  $prevTag...$version"
@@ -67,7 +67,7 @@ jobs:
         }
         
         $commits = if ($prevTag) {
-          git log "$prevTag.. HEAD" --pretty=format:"%s (%h)" --no-merges
+          git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
         } else {
           git log --pretty=format:"%s (%h)" --no-merges
         }
@@ -77,7 +77,7 @@ jobs:
         $otherCommits = @()
         
         foreach ($commit in $commits) {
-          if ($commit -match "^feat(\(.+?\))?:\s*(.+)") {
+          if ($commit -match "^feat(\(. +?\))?:\s*(.+)") {
             $featCommits += $commit
           } elseif ($commit -match "^fix(\(. +?\))?:\s*(.+)") {
             $fixCommits += $commit
@@ -93,7 +93,7 @@ jobs:
           $changelog += "`n## ✨ Features"
           $changelog += $featCommits
         }
-        if ($fixCommits.Count -gt 0) {
+        if ($fixCommits. Count -gt 0) {
           $changelog += "`n## 🐛 Fixes"
           $changelog += $fixCommits
         }
@@ -104,9 +104,9 @@ jobs:
         
         $changelogText = $changelog -join "`n"
         
-        $delimiter = [System. Guid]::NewGuid().ToString()
+        $delimiter = [System.Guid]::NewGuid().ToString()
         "CHANGELOG<<$delimiter" | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
-        $changelogText | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        $changelogText | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
         $delimiter | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
         
         echo "Generated changelog:"
@@ -120,7 +120,7 @@ jobs:
     
     - name: Create Release
       uses: softprops/action-gh-release@v2
-      with: 
+      with:
         tag_name: v${{ steps.read-version.outputs. VERSION }}
         name: Release v${{ steps.read-version.outputs.VERSION }}
         body: ${{ steps.changelog. outputs. CHANGELOG }}
