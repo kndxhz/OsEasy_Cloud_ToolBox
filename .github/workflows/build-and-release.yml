@@ -23,7 +23,7 @@ jobs:
       id: read-version
       shell: pwsh
       run:  |
-        $assemblyInfoPath = Get-ChildItem -Path . -Filter "AssemblyInfo. cs" -Recurse | Select-Object -First 1
+        $assemblyInfoPath = Get-ChildItem -Path . -Filter "AssemblyInfo.cs" -Recurse | Select-Object -First 1
         if ($assemblyInfoPath) {
           $content = Get-Content -LiteralPath $assemblyInfoPath. FullName -Raw
           if ($content -match 'AssemblyVersion\("([^"]+)"\)') {
