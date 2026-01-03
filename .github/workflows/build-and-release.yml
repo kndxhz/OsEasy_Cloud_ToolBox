@@ -1,17 +1,17 @@
 name: Build and Release
 
-on:  
-  workflow_dispatch:  # 手动触发工作流
+on: 
+  workflow_dispatch: 
 
-jobs:  
-  build-and-release: 
+jobs:
+  build-and-release:
     runs-on:  windows-latest
     
-    steps: 
-    - name:  Checkout code
+    steps:
+    - name: Checkout code
       uses: actions/checkout@v4
       with: 
-        fetch-depth:  0  # 获取完整的 Git 历史以便生成变更日志
+        fetch-depth: 0
     
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
@@ -130,8 +130,7 @@ jobs:
     - name: Find and rename EXE
       shell: pwsh
       run: |
-        # 查找生成的 EXE 文件（通常在 bin\Release 目录下）
-        $exeFile = Get-ChildItem -Path . -Filter "*.exe" -Recurse | Where-Object { $_. FullName -match "\\bin\\Release\\" } | Select-Object -First 1
+        $exeFile = Get-ChildItem -Path . -Filter "*. exe" -Recurse | Where-Object { $_.FullName -match "\\bin\\Release\\" } | Select-Object -First 1
         
         if ($exeFile) {
           $targetName = "OsEasy_Cloud_ToolBox.exe"
@@ -139,9 +138,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
           Copy-Item $exeFile.FullName -Destination "$outputDir/$targetName"
           
-          # 复制可能需要的依赖文件
-          $binDir = $exeFile.Directory. FullName
-          Get-ChildItem -Path $binDir -Include @("*.dll", "*.config") | ForEach-Object {
+          $binDir = $exeFile. Directory. FullName
+          Get-ChildItem -Path $binDir -Include @("*.dll", "*. config") | ForEach-Object {
             Copy-Item $_. FullName -Destination $outputDir
           }
           
@@ -157,12 +155,12 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with: 
-        tag_name: v${{ steps.read-version.outputs.VERSION }}
-        name: Release v${{ steps.read-version.outputs.VERSION }}
+        tag_name: v${{ steps.read-version.outputs. VERSION }}
+        name: Release v${{ steps.read-version. outputs.VERSION }}
         body_path: changelog.txt
         files: |
-          ${{ steps.find-exe.outputs.EXE_PATH }}
-        draft: false
-        prerelease:  false
-      env: 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ${{ steps. find-exe.outputs.EXE_PATH }}
+        draft:  false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets. GITHUB_TOKEN }}
