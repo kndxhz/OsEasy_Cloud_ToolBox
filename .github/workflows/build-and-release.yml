@@ -3,21 +3,21 @@ name: Build and Release
 on: 
   workflow_dispatch:  # 手动触发工作流
 
-jobs: 
+jobs:  
   build-and-release: 
-    runs-on: windows-latest
+    runs-on:  windows-latest
     
     steps: 
-    - name: Checkout code
+    - name:  Checkout code
       uses: actions/checkout@v4
-      with:
+      with: 
         fetch-depth: 0  # 获取完整的 Git 历史以便生成变更日志
     
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1. 1
+      uses: microsoft/setup-msbuild@v2
     
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1
+      uses: NuGet/setup-nuget@v2
     
     - name: Read version from AssemblyInfo.cs
       id: read-version
@@ -121,7 +121,7 @@ jobs:
         $changelog | Out-File -FilePath changelog.txt -Encoding UTF8
         echo "Changelog generated successfully"
     
-    - name:  Restore NuGet packages
+    - name: Restore NuGet packages
       run: nuget restore
     
     - name: Build with MSBuild
@@ -131,25 +131,25 @@ jobs:
       shell: pwsh
       run: |
         # 查找生成的 EXE 文件（通常在 bin\Release 目录下）
-        $exeFile = Get-ChildItem -Path .  -Filter "*. exe" -Recurse | Where-Object { $_.FullName -match "\\bin\\Release\\" } | Select-Object -First 1
+        $exeFile = Get-ChildItem -Path . -Filter "*.exe" -Recurse | Where-Object { $_.FullName -match "\\bin\\Release\\" } | Select-Object -First 1
         
         if ($exeFile) {
-          $targetName = "OsEasy_Cloud_ToolBox.exe"
+          $targetName = "OsEasy_Cloud_ToolBox. exe"
           $outputDir = "./release-output"
           New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
-          Copy-Item $exeFile. FullName -Destination "$outputDir/$targetName"
+          Copy-Item $exeFile.FullName -Destination "$outputDir/$targetName"
           
           # 复制可能需要的依赖文件
           $binDir = $exeFile.Directory. FullName
-          Get-ChildItem -Path $binDir -Include @("*.dll", "*.config") | ForEach-Object {
-            Copy-Item $_.FullName -Destination $outputDir
+          Get-ChildItem -Path $binDir -Include @("*.dll", "*. config") | ForEach-Object {
+            Copy-Item $_. FullName -Destination $outputDir
           }
           
           echo "EXE_PATH=$outputDir/$targetName" >> $env:GITHUB_OUTPUT
           echo "EXE renamed to $targetName"
           echo "Location: $outputDir"
         } else {
-          echo "Error: No EXE file found in bin\Release"
+          echo "Error:  No EXE file found in bin\Release"
           exit 1
         }
       id: find-exe
@@ -157,12 +157,12 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with: 
-        tag_name: v${{ steps.read-version.outputs. VERSION }}
-        name: Release v${{ steps.read-version. outputs.VERSION }}
+        tag_name: v${{ steps.read-version.outputs.VERSION }}
+        name: Release v${{ steps.read-version.outputs.VERSION }}
         body_path: changelog.txt
         files: |
           ${{ steps.find-exe.outputs.EXE_PATH }}
         draft: false
-        prerelease: false
+        prerelease:  false
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
