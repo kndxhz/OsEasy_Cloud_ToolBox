@@ -1,42 +1,41 @@
 name: Build and Release
 
 on:  
-  workflow_dispatch: 
+  workflow_dispatch:  # 手动触发工作流
 
-jobs:
-  build-and-release:
+jobs:  
+  build-and-release: 
     runs-on:  windows-latest
     
-    steps:
-    - name: Checkout code
+    steps: 
+    - name:  Checkout code
       uses: actions/checkout@v4
       with: 
-        fetch-depth: 0
+        fetch-depth:  0  # 获取完整的 Git 历史以便生成变更日志
     
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     
-    - name:  Setup NuGet
-      uses:  NuGet/setup-nuget@v2
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
     
     - name: Read version from AssemblyInfo.cs
       id: read-version
       shell: pwsh
       run: |
-        $assemblyInfoPath = "OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs"
-        
-        if (Test-Path $assemblyInfoPath) {
-          $content = Get-Content $assemblyInfoPath -Raw
-          if ($content -match 'AssemblyVersion\("(. +?)"\)') {
+        $assemblyInfoPath = Get-ChildItem -Path . -Filter "AssemblyInfo.cs" -Recurse | Select-Object -First 1
+        if ($assemblyInfoPath) {
+          $content = Get-Content -LiteralPath $assemblyInfoPath.FullName -Raw
+          if ($content -match 'AssemblyVersion\("([^"]+)"\)') {
             $version = $matches[1]
-            echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+            "VERSION=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
             echo "Found version: $version"
           } else {
-            echo "Error:  Could not find AssemblyVersion"
+            echo "Error: Could not find AssemblyVersion in $($assemblyInfoPath.FullName)"
             exit 1
           }
         } else {
-          echo "Error: $assemblyInfoPath not found"
+          echo "Error: AssemblyInfo.cs not found"
           exit 1
         }
     
@@ -47,10 +46,10 @@ jobs:
         $tags = git tag --sort=-version:refname
         if ($tags) {
           $prevTag = ($tags | Select-Object -First 1)
-          echo "PREV_TAG=$prevTag" >> $env: GITHUB_OUTPUT
+          "PREV_TAG=$prevTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           echo "Previous tag: $prevTag"
         } else {
-          echo "PREV_TAG=" >> $env:GITHUB_OUTPUT
+          "PREV_TAG=" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           echo "No previous tags found"
         }
     
@@ -61,102 +60,55 @@ jobs:
         $prevTag = "${{ steps.get-prev-tag.outputs.PREV_TAG }}"
         $version = "v${{ steps.read-version.outputs.VERSION }}"
         
+        # 生成 Full Changelog 链接
         if ($prevTag) {
-          $fullChangelog = "Full Changelog: $prevTag.. .$version"
+          $fullChangelog = "Full Changelog: $prevTag...$version"
         } else {
           $fullChangelog = "Full Changelog: Initial Release $version"
         }
         
+        # 获取提交信息
         $commits = if ($prevTag) {
           git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
         } else {
           git log --pretty=format:"%s (%h)" --no-merges
         }
         
+        # 分类提交
         $featCommits = @()
         $fixCommits = @()
         $otherCommits = @()
         
         foreach ($commit in $commits) {
-          if ($commit -match "^feat(\(. +?\))?:\s*(.+)") {
+          if ($commit -match "^feat(\(.+?\))?:\s*(.+)") {
             $featCommits += $commit
           } elseif ($commit -match "^fix(\(.+?\))?:\s*(.+)") {
             $fixCommits += $commit
-          } elseif ($commit -match "^(chore|docs|style|refactor|perf|test|build|ci)(\(.+?\))?:\s*(.+)") {
-            $otherCommits += $commit
           } else {
             $otherCommits += $commit
           }
         }
         
-        $changelog = $fullChangelog + "`n`n"
-        
+        # 构建 changelog 文本
+        $changelog = @()
+        $changelog += "# Changelog $version"
+        $changelog += $fullChangelog
         if ($featCommits.Count -gt 0) {
-          $changelog += "### ✨ Features`n"
-          foreach ($commit in $featCommits) {
-            $changelog += "- $commit`n"
-          }
-          $changelog += "`n"
+          $changelog += "`n## ✨ Features"
+          $changelog += $featCommits
         }
-        
         if ($fixCommits.Count -gt 0) {
-          $changelog += "### 🐛 Bug Fixes`n"
-          foreach ($commit in $fixCommits) {
-            $changelog += "- $commit`n"
-          }
-          $changelog += "`n"
+          $changelog += "`n## 🐛 Fixes"
+          $changelog += $fixCommits
         }
-        
         if ($otherCommits.Count -gt 0) {
-          $changelog += "### 📝 Other Changes`n"
-          foreach ($commit in $otherCommits) {
-            $changelog += "- $commit`n"
-          }
+          $changelog += "`n## 📦 Others"
+          $changelog += $otherCommits
         }
         
-        $changelog | Out-File -FilePath changelog.txt -Encoding UTF8
-        echo "Changelog generated successfully"
-    
-    - name:  Restore NuGet packages
-      run: nuget restore
-    
-    - name: Build with MSBuild
-      run: msbuild /p:Configuration=Release /p:Platform="Any CPU" /m
-    
-    - name: Find and rename EXE
-      shell: pwsh
-      run: |
-        $exeFile = Get-ChildItem -Path .  -Filter "*. exe" -Recurse | Where-Object { $_.FullName -match "\\bin\\Release\\" } | Select-Object -First 1
-        
-        if ($exeFile) {
-          $targetName = "OsEasy_Cloud_ToolBox.exe"
-          $outputDir = "./release-output"
-          New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
-          Copy-Item $exeFile.FullName -Destination "$outputDir/$targetName"
-          
-          $binDir = $exeFile.Directory. FullName
-          Get-ChildItem -Path $binDir -Include @("*.dll", "*.config") | ForEach-Object {
-            Copy-Item $_. FullName -Destination $outputDir
-          }
-          
-          echo "EXE_PATH=$outputDir/$targetName" >> $env:GITHUB_OUTPUT
-          echo "EXE renamed to $targetName"
-          echo "Location: $outputDir"
-        } else {
-          echo "Error:  No EXE file found in bin\Release"
-          exit 1
-        }
-      id: find-exe
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with: 
-        tag_name: v${{ steps.read-version.outputs. VERSION }}
-        name: Release v${{ steps.read-version. outputs.VERSION }}
-        body_path: changelog.txt
-        files: |
-          ${{ steps. find-exe.outputs.EXE_PATH }}
-        draft:  false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets. GITHUB_TOKEN }}
+        $changelogText = $changelog -join "`n"
+        "CHANGELOG<<'EOF'" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        $changelogText | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        echo "Generated changelog:"
+        echo $changelogText
