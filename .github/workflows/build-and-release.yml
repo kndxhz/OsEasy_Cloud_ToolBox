@@ -1,6 +1,6 @@
 name: Build and Release
 
-on: 
+on:  
   workflow_dispatch: 
 
 jobs:
@@ -16,16 +16,17 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v2
+    - name:  Setup NuGet
+      uses:  NuGet/setup-nuget@v2
     
     - name: Read version from AssemblyInfo.cs
       id: read-version
       shell: pwsh
       run: |
-        $assemblyInfoPath = Get-ChildItem -Path .  -Filter "AssemblyInfo. cs" -Recurse | Select-Object -First 1
-        if ($assemblyInfoPath) {
-          $content = Get-Content $assemblyInfoPath. FullName -Raw
+        $assemblyInfoPath = "OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs"
+        
+        if (Test-Path $assemblyInfoPath) {
+          $content = Get-Content $assemblyInfoPath -Raw
           if ($content -match 'AssemblyVersion\("(. +?)"\)') {
             $version = $matches[1]
             echo "VERSION=$version" >> $env:GITHUB_OUTPUT
@@ -35,7 +36,7 @@ jobs:
             exit 1
           }
         } else {
-          echo "Error: AssemblyInfo. cs not found"
+          echo "Error: $assemblyInfoPath not found"
           exit 1
         }
     
@@ -60,21 +61,18 @@ jobs:
         $prevTag = "${{ steps.get-prev-tag.outputs.PREV_TAG }}"
         $version = "v${{ steps.read-version.outputs.VERSION }}"
         
-        # 生成 Full Changelog 链接
         if ($prevTag) {
           $fullChangelog = "Full Changelog: $prevTag.. .$version"
         } else {
           $fullChangelog = "Full Changelog: Initial Release $version"
         }
         
-        # 获取提交信息
         $commits = if ($prevTag) {
           git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
         } else {
           git log --pretty=format:"%s (%h)" --no-merges
         }
         
-        # 分类提交
         $featCommits = @()
         $fixCommits = @()
         $otherCommits = @()
@@ -91,7 +89,6 @@ jobs:
           }
         }
         
-        # 构建变更日志
         $changelog = $fullChangelog + "`n`n"
         
         if ($featCommits.Count -gt 0) {
@@ -117,11 +114,10 @@ jobs:
           }
         }
         
-        # 保存到文件
         $changelog | Out-File -FilePath changelog.txt -Encoding UTF8
         echo "Changelog generated successfully"
     
-    - name: Restore NuGet packages
+    - name:  Restore NuGet packages
       run: nuget restore
     
     - name: Build with MSBuild
@@ -130,7 +126,7 @@ jobs:
     - name: Find and rename EXE
       shell: pwsh
       run: |
-        $exeFile = Get-ChildItem -Path . -Filter "*. exe" -Recurse | Where-Object { $_.FullName -match "\\bin\\Release\\" } | Select-Object -First 1
+        $exeFile = Get-ChildItem -Path .  -Filter "*. exe" -Recurse | Where-Object { $_.FullName -match "\\bin\\Release\\" } | Select-Object -First 1
         
         if ($exeFile) {
           $targetName = "OsEasy_Cloud_ToolBox.exe"
@@ -138,8 +134,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
           Copy-Item $exeFile.FullName -Destination "$outputDir/$targetName"
           
-          $binDir = $exeFile. Directory. FullName
-          Get-ChildItem -Path $binDir -Include @("*.dll", "*. config") | ForEach-Object {
+          $binDir = $exeFile.Directory. FullName
+          Get-ChildItem -Path $binDir -Include @("*.dll", "*.config") | ForEach-Object {
             Copy-Item $_. FullName -Destination $outputDir
           }
           
