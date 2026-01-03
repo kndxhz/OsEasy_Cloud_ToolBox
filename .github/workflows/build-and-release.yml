@@ -1,0 +1,168 @@
+name: Build and Release
+
+on: 
+  workflow_dispatch:  # 手动触发工作流
+
+jobs: 
+  build-and-release: 
+    runs-on: windows-latest
+    
+    steps: 
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 获取完整的 Git 历史以便生成变更日志
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1. 1
+    
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1
+    
+    - name: Read version from AssemblyInfo.cs
+      id: read-version
+      shell: pwsh
+      run: |
+        $assemblyInfoPath = Get-ChildItem -Path .  -Filter "AssemblyInfo. cs" -Recurse | Select-Object -First 1
+        if ($assemblyInfoPath) {
+          $content = Get-Content $assemblyInfoPath. FullName -Raw
+          if ($content -match 'AssemblyVersion\("(. +?)"\)') {
+            $version = $matches[1]
+            echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+            echo "Found version: $version"
+          } else {
+            echo "Error:  Could not find AssemblyVersion"
+            exit 1
+          }
+        } else {
+          echo "Error: AssemblyInfo. cs not found"
+          exit 1
+        }
+    
+    - name: Get previous tag
+      id: get-prev-tag
+      shell: pwsh
+      run: |
+        $tags = git tag --sort=-version:refname
+        if ($tags) {
+          $prevTag = ($tags | Select-Object -First 1)
+          echo "PREV_TAG=$prevTag" >> $env: GITHUB_OUTPUT
+          echo "Previous tag: $prevTag"
+        } else {
+          echo "PREV_TAG=" >> $env:GITHUB_OUTPUT
+          echo "No previous tags found"
+        }
+    
+    - name:  Generate changelog
+      id: changelog
+      shell: pwsh
+      run: |
+        $prevTag = "${{ steps.get-prev-tag.outputs.PREV_TAG }}"
+        $version = "v${{ steps.read-version.outputs.VERSION }}"
+        
+        # 生成 Full Changelog 链接
+        if ($prevTag) {
+          $fullChangelog = "Full Changelog: $prevTag.. .$version"
+        } else {
+          $fullChangelog = "Full Changelog: Initial Release $version"
+        }
+        
+        # 获取提交信息
+        $commits = if ($prevTag) {
+          git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
+        } else {
+          git log --pretty=format:"%s (%h)" --no-merges
+        }
+        
+        # 分类提交
+        $featCommits = @()
+        $fixCommits = @()
+        $otherCommits = @()
+        
+        foreach ($commit in $commits) {
+          if ($commit -match "^feat(\(. +?\))?:\s*(.+)") {
+            $featCommits += $commit
+          } elseif ($commit -match "^fix(\(.+?\))?:\s*(.+)") {
+            $fixCommits += $commit
+          } elseif ($commit -match "^(chore|docs|style|refactor|perf|test|build|ci)(\(.+?\))?:\s*(.+)") {
+            $otherCommits += $commit
+          } else {
+            $otherCommits += $commit
+          }
+        }
+        
+        # 构建变更日志
+        $changelog = $fullChangelog + "`n`n"
+        
+        if ($featCommits.Count -gt 0) {
+          $changelog += "### ✨ Features`n"
+          foreach ($commit in $featCommits) {
+            $changelog += "- $commit`n"
+          }
+          $changelog += "`n"
+        }
+        
+        if ($fixCommits.Count -gt 0) {
+          $changelog += "### 🐛 Bug Fixes`n"
+          foreach ($commit in $fixCommits) {
+            $changelog += "- $commit`n"
+          }
+          $changelog += "`n"
+        }
+        
+        if ($otherCommits.Count -gt 0) {
+          $changelog += "### 📝 Other Changes`n"
+          foreach ($commit in $otherCommits) {
+            $changelog += "- $commit`n"
+          }
+        }
+        
+        # 保存到文件
+        $changelog | Out-File -FilePath changelog.txt -Encoding UTF8
+        echo "Changelog generated successfully"
+    
+    - name:  Restore NuGet packages
+      run: nuget restore
+    
+    - name: Build with MSBuild
+      run: msbuild /p:Configuration=Release /p:Platform="Any CPU" /m
+    
+    - name: Find and rename EXE
+      shell: pwsh
+      run: |
+        # 查找生成的 EXE 文件（通常在 bin\Release 目录下）
+        $exeFile = Get-ChildItem -Path .  -Filter "*. exe" -Recurse | Where-Object { $_.FullName -match "\\bin\\Release\\" } | Select-Object -First 1
+        
+        if ($exeFile) {
+          $targetName = "OsEasy_Cloud_ToolBox.exe"
+          $outputDir = "./release-output"
+          New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+          Copy-Item $exeFile. FullName -Destination "$outputDir/$targetName"
+          
+          # 复制可能需要的依赖文件
+          $binDir = $exeFile.Directory. FullName
+          Get-ChildItem -Path $binDir -Include @("*.dll", "*.config") | ForEach-Object {
+            Copy-Item $_.FullName -Destination $outputDir
+          }
+          
+          echo "EXE_PATH=$outputDir/$targetName" >> $env:GITHUB_OUTPUT
+          echo "EXE renamed to $targetName"
+          echo "Location: $outputDir"
+        } else {
+          echo "Error: No EXE file found in bin\Release"
+          exit 1
+        }
+      id: find-exe
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with: 
+        tag_name: v${{ steps.read-version.outputs. VERSION }}
+        name: Release v${{ steps.read-version. outputs.VERSION }}
+        body_path: changelog.txt
+        files: |
+          ${{ steps.find-exe.outputs.EXE_PATH }}
+        draft: false
+        prerelease: false
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
