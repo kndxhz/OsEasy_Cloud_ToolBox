@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("可耐的小伙纸")]
 [assembly: AssemblyProduct("OsEasy_Cloud_ToolBox")]
-[assembly: AssemblyCopyright("Copyright ©  2024")]
+[assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("github.com/kndxhz/OsEasy_Cloud_ToolBox")]
 [assembly: AssemblyCulture("")]
 
