@@ -3,17 +3,17 @@ name: Build and Release
 on:  
   workflow_dispatch:  # 手动触发工作流
 
-jobs:  
-  build-and-release: 
-    runs-on:  windows-latest
+jobs:   
+  build-and-release:  
+    runs-on: windows-latest
     
-    steps: 
-    - name:  Checkout code
+    steps:  
+    - name: Checkout code
       uses: actions/checkout@v4
-      with: 
-        fetch-depth:  0  # 获取完整的 Git 历史以便生成变更日志
+      with:  
+        fetch-depth: 0  # 获取完整的 Git 历史以便生成变更日志
     
-    - name: Setup MSBuild
+    - name:  Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     
     - name: Setup NuGet
@@ -23,15 +23,15 @@ jobs:
       id: read-version
       shell: pwsh
       run: |
-        $assemblyInfoPath = Get-ChildItem -Path . -Filter "AssemblyInfo.cs" -Recurse | Select-Object -First 1
+        $assemblyInfoPath = Get-ChildItem -Path .  -Filter "AssemblyInfo.cs" -Recurse | Select-Object -First 1
         if ($assemblyInfoPath) {
-          $content = Get-Content -LiteralPath $assemblyInfoPath.FullName -Raw
+          $content = Get-Content -LiteralPath $assemblyInfoPath. FullName -Raw
           if ($content -match 'AssemblyVersion\("([^"]+)"\)') {
             $version = $matches[1]
             "VERSION=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-            echo "Found version: $version"
+            echo "Found version:  $version"
           } else {
-            echo "Error: Could not find AssemblyVersion in $($assemblyInfoPath.FullName)"
+            echo "Error: Could not find AssemblyVersion in $($assemblyInfoPath. FullName)"
             exit 1
           }
         } else {
@@ -39,66 +39,99 @@ jobs:
           exit 1
         }
     
-        - name:   Generate changelog
-          id: changelog
-          shell: pwsh
-          run: |
-            $prevTag = "${{ steps.get-prev-tag. outputs.PREV_TAG }}"
-            $version = "v${{ steps.read-version.outputs. VERSION }}"
-            
-            # 生成 Full Changelog 链接
-            if ($prevTag) {
-              $fullChangelog = "Full Changelog: $prevTag...$version"
-            } else {
-              $fullChangelog = "Full Changelog: Initial Release $version"
-            }
-            
-            # 获取提交信息
-            $commits = if ($prevTag) {
-              git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
-            } else {
-              git log --pretty=format:"%s (%h)" --no-merges
-            }
-            
-            # 分类提交
-            $featCommits = @()
-            $fixCommits = @()
-            $otherCommits = @()
-            
-            foreach ($commit in $commits) {
-              if ($commit -match "^feat(\(.+?\))?:\s*(.+)") {
-                $featCommits += $commit
-              } elseif ($commit -match "^fix(\(. +?\))?:\s*(.+)") {
-                $fixCommits += $commit
-              } else {
-                $otherCommits += $commit
-              }
-            }
-            
-            # 构建 changelog 文本
-            $changelog = @()
-            $changelog += "# Changelog $version"
-            $changelog += $fullChangelog
-            if ($featCommits.Count -gt 0) {
-              $changelog += "`n## ✨ Features"
-              $changelog += $featCommits
-            }
-            if ($fixCommits.Count -gt 0) {
-              $changelog += "`n## 🐛 Fixes"
-              $changelog += $fixCommits
-            }
-            if ($otherCommits.Count -gt 0) {
-              $changelog += "`n## 📦 Others"
-              $changelog += $otherCommits
-            }
-            
-            $changelogText = $changelog -join "`n"
-            
-            # 使用随机分隔符处理多行输出
-            $delimiter = [System. Guid]::NewGuid().ToString()
-            "CHANGELOG<<$delimiter" | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
-            $changelogText | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-            $delimiter | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-            
-            echo "Generated changelog:"
-            echo $changelogText
+    - name: Get previous tag
+      id: get-prev-tag
+      shell:  pwsh
+      run: |
+        $tags = git tag --sort=-version:refname
+        if ($tags) {
+          $prevTag = ($tags | Select-Object -First 1)
+          "PREV_TAG=$prevTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          echo "Previous tag: $prevTag"
+        } else {
+          "PREV_TAG=" | Out-File -FilePath $env: GITHUB_OUTPUT -Encoding utf8 -Append
+          echo "No previous tags found"
+        }
+    
+    - name: Generate changelog
+      id:  changelog
+      shell:  pwsh
+      run: |
+        $prevTag = "${{ steps.get-prev-tag. outputs.PREV_TAG }}"
+        $version = "v${{ steps.read-version.outputs. VERSION }}"
+        
+        # 生成 Full Changelog 链接
+        if ($prevTag) {
+          $fullChangelog = "Full Changelog: $prevTag...$version"
+        } else {
+          $fullChangelog = "Full Changelog: Initial Release $version"
+        }
+        
+        # 获取提交信息
+        $commits = if ($prevTag) {
+          git log "$prevTag..HEAD" --pretty=format:"%s (%h)" --no-merges
+        } else {
+          git log --pretty=format:"%s (%h)" --no-merges
+        }
+        
+        # 分类提交
+        $featCommits = @()
+        $fixCommits = @()
+        $otherCommits = @()
+        
+        foreach ($commit in $commits) {
+          if ($commit -match "^feat(\(.+?\))?:\s*(.+)") {
+            $featCommits += $commit
+          } elseif ($commit -match "^fix(\(. +?\))?:\s*(.+)") {
+            $fixCommits += $commit
+          } else {
+            $otherCommits += $commit
+          }
+        }
+        
+        # 构建 changelog 文本
+        $changelog = @()
+        $changelog += "# Changelog $version"
+        $changelog += $fullChangelog
+        if ($featCommits.Count -gt 0) {
+          $changelog += "`n## ✨ Features"
+          $changelog += $featCommits
+        }
+        if ($fixCommits.Count -gt 0) {
+          $changelog += "`n## 🐛 Fixes"
+          $changelog += $fixCommits
+        }
+        if ($otherCommits.Count -gt 0) {
+          $changelog += "`n## 📦 Others"
+          $changelog += $otherCommits
+        }
+        
+        $changelogText = $changelog -join "`n"
+        
+        # 使用随机分隔符处理多行输出
+        $delimiter = [System.Guid]::NewGuid().ToString()
+        "CHANGELOG<<$delimiter" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        $changelogText | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        $delimiter | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        
+        echo "Generated changelog:"
+        echo $changelogText
+    
+    - name:  Restore NuGet packages
+      run: nuget restore
+    
+    - name:  Build solution
+      run: msbuild /p: Configuration=Release /p:Platform="Any CPU"
+    
+    - name:  Create Release
+      uses: softprops/action-gh-release@v2
+      with: 
+        tag_name: v${{ steps.read-version.outputs. VERSION }}
+        name: Release v${{ steps.read-version.outputs. VERSION }}
+        body: ${{ steps.changelog. outputs. CHANGELOG }}
+        draft: false
+        prerelease: false
+        files: |
+          **/bin/Release/*. exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
