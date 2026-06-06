@@ -17,7 +17,7 @@ namespace OsEasy_Cloud_ToolBox
         // 存储一系列的句子
         private string[] sentences_list = new string[]
         {
-            "你知道吗：在按钮上右键就可以查看帮助了",
+            "你知道吗：在按钮上右键就可以查看帮助了（还在逐步完善）",
             "《机课时间管理》",
             "开源造福人类",
             "锟斤拷烫烫烫",
@@ -479,7 +479,7 @@ namespace OsEasy_Cloud_ToolBox
 
         private void label_1_click(object sender, EventArgs e)
         {
-            Process.Start(new ProcessStartInfo("https://kndxhz.cn/") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://www.kndxhz.cn/") { UseShellExecute = true });
         }
     }
 }
