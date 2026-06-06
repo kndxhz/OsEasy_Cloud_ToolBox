@@ -63,7 +63,8 @@
     <ManifestCertificateThumbprint>61CAFF435DFE0F7A4932AC5BBCB6FA3F5EA30043</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>OsEasy_Cloud_ToolBox_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>
+    </ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
