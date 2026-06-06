@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,6 +17,7 @@ namespace OsEasy_Cloud_ToolBox
         // 存储一系列的句子
         private string[] sentences_list = new string[]
         {
+            "你知道吗：在按钮上右键就可以查看帮助了",
             "《机课时间管理》",
             "开源造福人类",
             "锟斤拷烫烫烫",
@@ -30,8 +33,10 @@ namespace OsEasy_Cloud_ToolBox
 
         private int current_sentence_index = 0; // 当前显示的句子索引
         private int current_char_index = 0; // 当前句子的字符索引
-        private Timer typing_timer;
-        private Timer process_check_timer;
+        private System.Windows.Forms.Timer typing_timer;
+        private System.Windows.Forms.Timer process_check_timer;
+        private int process_check_in_progress = 0;
+        public static bool process_is_suspended = false; // 记录学生端是否被挂起
 
         public Main()
         {
@@ -62,7 +67,7 @@ namespace OsEasy_Cloud_ToolBox
                 directory_1 = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
             }
             // 初始化定时器
-            typing_timer = new Timer();
+            typing_timer = new System.Windows.Forms.Timer();
             typing_timer.Interval = 100; // 设置每次显示字符的间隔（100毫秒）
             typing_timer.Tick += typing_timer_tick;
 
@@ -70,12 +75,109 @@ namespace OsEasy_Cloud_ToolBox
             typing_timer.Start();
 
 
-            process_check_timer = new Timer();
+            process_check_timer = new System.Windows.Forms.Timer();
             process_check_timer.Interval = 1000; // 每1秒检查一次学生端进程
+            process_check_timer.Tick += process_check_timer_tick;
+
+            process_check_timer.Start();
 
         }
 
+        private void process_check_timer_tick(object sender, EventArgs e)
+        {
+            // 防止上一次检查尚未完成就再次启动
+            if (Interlocked.Exchange(ref process_check_in_progress, 1) == 1)
+            {
+                return;
+            }
+            // 在后台线程执行进程检查，避免在UI线程上阻塞
+            Task.Run(() =>
+            {
+                string status;
+                bool detected_suspended = false;
+                try
+                {
+                    var student_process = Process.GetProcessesByName("Student").FirstOrDefault();
+                    if (student_process == null)
+                    {
+                        status = "学生端状态：学生端未运行";
+                        detected_suspended = false;
+                    }
+                    else
+                    {
+                        bool is_responding = false;
+                        try
+                        {
+                            is_responding = student_process.Responding;
+                        }
+                        catch
+                        {
+                            is_responding = false;
+                        }
 
+                        // 检测进程是否被挂起
+                        try
+                        {
+                            student_process.Refresh();
+                            detected_suspended = false;
+                            foreach (ProcessThread thread in student_process.Threads)
+                            {
+                                try
+                                {
+                                    // 检查线程状态是否为 Wait 且挂起原因
+                                    if (thread.ThreadState == System.Diagnostics.ThreadState.Wait &&
+                                        thread.WaitReason == System.Diagnostics.ThreadWaitReason.Suspended)
+                                    {
+                                        detected_suspended = true;
+                                        break;   // 只要有一个线程被挂起即可判定
+                                    }
+                                }
+                                catch
+                                {
+                                    // 忽略无法访问的线程
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            detected_suspended = false;
+                        }
+
+                        status = detected_suspended ? "学生端状态：学生端被挂起" : "学生端状态：学生端正在运行";
+                    }
+                }
+                catch
+                {
+                    status = "学生端状态：检查失败";
+                    detected_suspended = false;
+                }
+
+                // 将结果回到UI线程显示，并同步 More 窗体的按钮文本
+                try
+                {
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        this.Text = status;
+                        // 更新静态状态，供 More 使用
+                        process_is_suspended = detected_suspended;
+
+                        // 如果 More 窗体已打开，更新其按钮文本
+                        try
+                        {
+                            if (form2_instance != null && !form2_instance.IsDisposed)
+                            {
+                                form2_instance.UpdateSuspendButton(detected_suspended);
+                            }
+                        }
+                        catch { }
+                    }));
+                }
+                catch { }
+
+                Interlocked.Exchange(ref process_check_in_progress, 0);
+            });
+        }
+        
         // 定时器事件：每次触发时，逐个显示字符
         private void typing_timer_tick(object sender, EventArgs e)
         {
@@ -92,7 +194,7 @@ namespace OsEasy_Cloud_ToolBox
                 typing_timer.Stop();
 
                 // 设置间隔时间后切换到下一个句子
-                Timer switch_sentence_timer = new Timer();
+                System.Windows.Forms.Timer switch_sentence_timer = new System.Windows.Forms.Timer();
                 switch_sentence_timer.Interval = 3000; // 切换句子的间隔（3000毫秒）
                 switch_sentence_timer.Tick += (s, args) =>
                 {
