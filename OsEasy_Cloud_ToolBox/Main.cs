@@ -43,6 +43,18 @@ namespace OsEasy_Cloud_ToolBox
             InitializeComponent();
         }
         public static string directory_1;
+
+        private void button_mouse_down(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                Button btn = sender as Button;
+                if (btn != null)
+                {
+                    show_help.ShowHelp(btn.Name, false);
+                }
+            }
+        }
         [STAThread]
         private void main_form_load(object sender, EventArgs e)
         {
@@ -66,6 +78,13 @@ namespace OsEasy_Cloud_ToolBox
             {
                 directory_1 = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
             }
+
+            // 为按钮添加右键帮助事件
+            this.button_1.MouseDown += button_mouse_down;
+            this.button_2.MouseDown += button_mouse_down;
+            this.button_3.MouseDown += button_mouse_down;
+            this.button_4.MouseDown += button_mouse_down;
+
             // 初始化定时器
             typing_timer = new System.Windows.Forms.Timer();
             typing_timer.Interval = 100; // 设置每次显示字符的间隔（100毫秒）

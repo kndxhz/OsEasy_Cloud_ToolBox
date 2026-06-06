@@ -30,9 +30,28 @@ namespace OsEasy_Cloud_ToolBox
             InitializeComponent();
         }
 
+        private void button_mouse_down(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                Button btn = sender as Button;
+                if (btn != null)
+                {
+                    show_help.ShowHelp(btn.Name, true);
+                }
+            }
+        }
+
         private void more_form_load(object sender, EventArgs e)
         {
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
+            
+            // 为按钮添加右键帮助事件
+            this.button_1.MouseDown += button_mouse_down;
+            this.button_2.MouseDown += button_mouse_down;
+            this.button_3.MouseDown += button_mouse_down;
+            this.button_4.MouseDown += button_mouse_down;
+
             if (is_suspended)
             {
                 this.button_1.Text = "恢复学生端";
