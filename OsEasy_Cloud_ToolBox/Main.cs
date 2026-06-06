@@ -13,7 +13,7 @@ namespace OsEasy_Cloud_ToolBox
     public partial class Main : Form
     {
         // 存储一系列的句子
-        private string[] sentences = new string[]
+        private string[] sentences_list = new string[]
         {
             "《机课时间管理》",
             "开源造福人类",
@@ -28,100 +28,107 @@ namespace OsEasy_Cloud_ToolBox
             "互联网大厂都是草台班子"
         };
 
-        private int currentSentenceIndex = 0; // 当前显示的句子索引
-        private int currentCharIndex = 0; // 当前句子的字符索引
-        private Timer typingTimer;
+        private int current_sentence_index = 0; // 当前显示的句子索引
+        private int current_char_index = 0; // 当前句子的字符索引
+        private Timer typing_timer;
+        private Timer process_check_timer;
 
         public Main()
         {
             InitializeComponent();
         }
-        public static string directory1;
+        public static string directory_1;
         [STAThread]
-        private void Form1_Load(object sender, EventArgs e)
+        private void main_form_load(object sender, EventArgs e)
         {
             // 这里不再进行自提权，统一由 Program.Main 处理
 
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
-            this.label1.Text = "";
+            this.label_1.Text = "";
             try
             {
                 var process = Process.GetProcessesByName("Student").FirstOrDefault();
                 if (process != null && process.MainModule != null)
                 {
-                    directory1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
+                    directory_1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
                 }
                 else
                 {
-                    throw new InvalidOperationException("Student 进程未找到");
+                    throw new InvalidOperationException("学生端进程未找到");
                 }
             }
             catch (Exception)
             {
-                directory1 = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
+                directory_1 = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
             }
             // 初始化定时器
-            typingTimer = new Timer();
-            typingTimer.Interval = 100; // 设置每次显示字符的间隔（100毫秒）
-            typingTimer.Tick += TypingTimer_Tick;
+            typing_timer = new Timer();
+            typing_timer.Interval = 100; // 设置每次显示字符的间隔（100毫秒）
+            typing_timer.Tick += typing_timer_tick;
 
             // 开始打字效果
-            typingTimer.Start();
+            typing_timer.Start();
+
+
+            process_check_timer = new Timer();
+            process_check_timer.Interval = 1000; // 每1秒检查一次学生端进程
+
         }
 
+
         // 定时器事件：每次触发时，逐个显示字符
-        private void TypingTimer_Tick(object sender, EventArgs e)
+        private void typing_timer_tick(object sender, EventArgs e)
         {
             // 判断当前句子是否已显示完
-            if (currentCharIndex < sentences[currentSentenceIndex].Length)
+            if (current_char_index < sentences_list[current_sentence_index].Length)
             {
                 // 将下一个字符添加到 label1
-                this.label1.Text += sentences[currentSentenceIndex][currentCharIndex];
-                currentCharIndex++; // 移动到下一个字符
+                this.label_1.Text += sentences_list[current_sentence_index][current_char_index];
+                current_char_index++; // 移动到下一个字符
             }
             else
             {
                 // 当前句子显示完后，暂停一段时间
-                typingTimer.Stop();
+                typing_timer.Stop();
 
                 // 设置间隔时间后切换到下一个句子
-                Timer switchSentenceTimer = new Timer();
-                switchSentenceTimer.Interval = 3000; // 切换句子的间隔（3000毫秒）
-                switchSentenceTimer.Tick += (s, args) =>
+                Timer switch_sentence_timer = new Timer();
+                switch_sentence_timer.Interval = 3000; // 切换句子的间隔（3000毫秒）
+                switch_sentence_timer.Tick += (s, args) =>
                 {
                     // 重新设置定时器，显示下一个句子
-                    switchSentenceTimer.Stop();
-                    currentCharIndex = 0; // 重置字符索引
-                    currentSentenceIndex++; // 切换到下一个句子
-                    if (currentSentenceIndex >= sentences.Length)
+                    switch_sentence_timer.Stop();
+                    current_char_index = 0; // 重置字符索引
+                    current_sentence_index++; // 切换到下一个句子
+                    if (current_sentence_index >= sentences_list.Length)
                     {
-                        currentSentenceIndex = 0; // 如果到了最后一条，重新从头开始
+                        current_sentence_index = 0; // 如果到了最后一条，重新从头开始
                     }
 
                     // 清空 label 并开始新的打字效果
-                    this.label1.Text = "";
-                    typingTimer.Start();
+                    this.label_1.Text = "";
+                    typing_timer.Start();
                 };
-                switchSentenceTimer.Start(); // 启动切换句子的定时器
+                switch_sentence_timer.Start(); // 启动切换句子的定时器
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_click(object sender, EventArgs e)
         {
             // 获取当前应用程序的临时目录路径
-            string tempDir = Path.GetTempPath();
+            string temp_dir = Path.GetTempPath();
 
             // 设定文件路径
-            string filePath = Path.Combine(tempDir, "killer.bat");
+            string file_path = Path.Combine(temp_dir, "killer.bat");
 
             // 将 Resources 中的 "killer" 文件写入到临时目录
-            File.WriteAllBytes(filePath, Encoding.Default.GetBytes(Properties.Resources.killer));
+            File.WriteAllBytes(file_path, Encoding.Default.GetBytes(Properties.Resources.killer));
 
             // 以管理员权限运行该文件
-            RunAsAdmin(filePath);
+            run_as_admin(file_path);
         }
 
-        public static void RunAsAdmin(string path)
+        public static void run_as_admin(string path)
         {
             // 检查文件是否存在
             if (!File.Exists(path))
@@ -130,7 +137,7 @@ namespace OsEasy_Cloud_ToolBox
             }
 
             // 设置 ProcessStartInfo 来以管理员权限运行
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            ProcessStartInfo start_info = new ProcessStartInfo
             {
                 FileName = path,        // 要执行的文件路径
                 Verb = "runas",         // 以管理员权限运行
@@ -138,35 +145,35 @@ namespace OsEasy_Cloud_ToolBox
             };
 
             // 启动进程
-            Process.Start(startInfo);
+            Process.Start(start_info);
         }
 
         private string force_get_teacher_ip()
         {
-            string hostName = Dns.GetHostName();
+            string host_name = Dns.GetHostName();
 
             // 获取本地主机的 IP 地址信息
-            IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+            IPHostEntry host_entry = Dns.GetHostEntry(host_name);
 
             // 从地址列表中找到第一个以 192.168 开头的 IPv4 地址
-            IPAddress localIp = hostEntry.AddressList.FirstOrDefault(ip =>
+            IPAddress local_ip = host_entry.AddressList.FirstOrDefault(ip =>
                 ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
                 ip.ToString().StartsWith("192.168"));
 
-            if (localIp != null)
+            if (local_ip != null)
             {
                 // 获取 IP 地址的字节数组（IPv4 为 4 个字节）
-                byte[] ipBytes = localIp.GetAddressBytes();
-                if (ipBytes.Length == 4)
+                byte[] ip_bytes = local_ip.GetAddressBytes();
+                if (ip_bytes.Length == 4)
                 {
                     // 将主机部分（第四个字节）设置为 250
-                    ipBytes[3] = 250;
+                    ip_bytes[3] = 250;
 
                     // 使用新的字节数组构造目标 IP 地址
-                    IPAddress targetIp = new IPAddress(ipBytes);
+                    IPAddress target_ip = new IPAddress(ip_bytes);
 
                     // 输出结果
-                    return targetIp.ToString();
+                    return target_ip.ToString();
                 }
                 else
                 {
@@ -181,7 +188,7 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button2_click(object sender, EventArgs e)
         {
             string get_ip_way = "";
             DialogResult chose_unlock_net = MessageBox.Show(
@@ -192,20 +199,20 @@ namespace OsEasy_Cloud_ToolBox
 
             if (chose_unlock_net == DialogResult.Yes)
             {
-                string filePath = $"{directory1}\\vdi_channel.log";
-                string lastTeacherIp = null;
+                string file_path = $"{directory_1}\\vdi_channel.log";
+                string last_teacher_ip = null;
                 // 调整正则表达式更严格的IP格式验证
-                Regex ipRegex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))", RegexOptions.Compiled);
+                Regex ip_regex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))", RegexOptions.Compiled);
 
                 try
                 {
-                    foreach (string line in File.ReadLines(filePath))
+                    foreach (string line in File.ReadLines(file_path))
                     {
-                        MatchCollection matches = ipRegex.Matches(line);
+                        MatchCollection matches = ip_regex.Matches(line);
                         if (matches.Count > 0)
                         {
                             // 修改为兼容C# 7.3的写法
-                            lastTeacherIp = matches[matches.Count - 1].Groups[1].Value;
+                            last_teacher_ip = matches[matches.Count - 1].Groups[1].Value;
                         }
                     }
                     get_ip_way = "读取日志匹配正则";
@@ -213,29 +220,29 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 catch (FileNotFoundException)
                 {
-                    lastTeacherIp = force_get_teacher_ip();
+                    last_teacher_ip = force_get_teacher_ip();
                     get_ip_way = "直接读取ip";
                 }
                 catch (Exception)
                 {
-                    lastTeacherIp = force_get_teacher_ip();
+                    last_teacher_ip = force_get_teacher_ip();
                     get_ip_way = "直接读取ip";
                 }
 
-                if (lastTeacherIp == null)
+                if (last_teacher_ip == null)
                 {
                     MessageBox.Show("ip两种方式都获取失败，请手动输入教师机ip！！！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     string input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
                     if (!string.IsNullOrEmpty(input))
                     {
-                        lastTeacherIp = input;
+                        last_teacher_ip = input;
                     }
                 }
                 else
                 {
                     //MessageBox.show
                     DialogResult confirm_ip = MessageBox.Show(
-            $"获取到的教师机ip：{lastTeacherIp}\n读取方式：{get_ip_way}\n是否正确？",  // 消息内容
+            $"获取到的教师机ip：{last_teacher_ip}\n读取方式：{get_ip_way}\n是否正确？",  // 消息内容
             "IP",                          // 标题
             MessageBoxButtons.YesNo,          // 显示"是"和"否"按钮
             MessageBoxIcon.Question);          // 警告图标
@@ -248,21 +255,21 @@ namespace OsEasy_Cloud_ToolBox
                         string input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
                         if (!string.IsNullOrEmpty(input))
                         {
-                            lastTeacherIp = input;
+                            last_teacher_ip = input;
                         }
                     }
                 }
-                ProcessStartInfo startInfo = new ProcessStartInfo
+                ProcessStartInfo start_info = new ProcessStartInfo
                 {
-                    FileName = $"{directory1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
-                    WorkingDirectory = $"{directory1}\\devicecontrol_x64",
-                    Arguments = $"--type net --operation 0 --extend {lastTeacherIp}",
+                    FileName = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
+                    WorkingDirectory = $"{directory_1}\\devicecontrol_x64",
+                    Arguments = $"--type net --operation 0 --extend {last_teacher_ip}",
                     Verb = "runas",                         // 以管理员权限运行
                     UseShellExecute = true                  // 使用外部 shell 启动
                 };
                 try
                 {
-                    Process.Start(startInfo);
+                    Process.Start(start_info);
                 }
                 catch (Exception ex)
                 {
@@ -282,34 +289,34 @@ namespace OsEasy_Cloud_ToolBox
                 if (confirm_status == DialogResult.Yes)
                 {
                     // 获取当前应用程序的临时目录路径
-                    string tempDir = Path.GetTempPath();
+                    string temp_dir = Path.GetTempPath();
 
                     // 设定文件路径
-                    string filePath = Path.Combine(tempDir, "task.bat");
+                    string file_path = Path.Combine(temp_dir, "task.bat");
 
                     // 将 Resources 中的 "task" 文件写入到临时目录
-                    File.WriteAllBytes(filePath, Encoding.Default.GetBytes(Properties.Resources.task));
+                    File.WriteAllBytes(file_path, Encoding.Default.GetBytes(Properties.Resources.task));
 
                     // 以管理员权限运行该文件
-                    RunAsAdmin(filePath);
+                    run_as_admin(file_path);
                 }
             }
         }
 
 
-        private void button3_Click(object sender, EventArgs e)
+        private void button3_click(object sender, EventArgs e)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            ProcessStartInfo start_info = new ProcessStartInfo
             {
-                FileName = $"{directory1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
-                WorkingDirectory = $"{directory1}\\devicecontrol_x64",
+                FileName = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
+                WorkingDirectory = $"{directory_1}\\devicecontrol_x64",
                 Arguments = $"--type usb --operation 0 --extend 0.0.0.0",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
             };
             try
             {
-                Process.Start(startInfo);
+                Process.Start(start_info);
             }
             catch (Exception ex)
             {
@@ -318,38 +325,38 @@ namespace OsEasy_Cloud_ToolBox
             MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void picture_box1_click(object sender, EventArgs e)
         {
             Process.Start(new ProcessStartInfo("https://github.com/kndxhz/OsEasy_Cloud_ToolBox") { UseShellExecute = true });
         }
 
 
-        private More form2Instance = null;
-        private void button4_Click(object sender, EventArgs e)
+        private More form2_instance = null;
+        private void button4_click(object sender, EventArgs e)
         {
 
 
             // 检查实例是否存在且未被释放
-            if (form2Instance == null || form2Instance.IsDisposed)
+            if (form2_instance == null || form2_instance.IsDisposed)
             {
-                form2Instance = new More();
+                form2_instance = new More();
                 // 窗体关闭时置空实例
-                form2Instance.FormClosed += (s, args) => form2Instance = null;
-                form2Instance.Show();
+                form2_instance.FormClosed += (s, args) => form2_instance = null;
+                form2_instance.Show();
             }
             else
             {
                 // 恢复最小化的窗体
-                if (form2Instance.WindowState == FormWindowState.Minimized)
-                    form2Instance.WindowState = FormWindowState.Normal;
+                if (form2_instance.WindowState == FormWindowState.Minimized)
+                    form2_instance.WindowState = FormWindowState.Normal;
 
                 // 激活并前置窗体
-                form2Instance.BringToFront();
-                form2Instance.Activate();
+                form2_instance.BringToFront();
+                form2_instance.Activate();
             }
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void label_1_click(object sender, EventArgs e)
         {
             Process.Start(new ProcessStartInfo("https://kndxhz.cn/") { UseShellExecute = true });
         }

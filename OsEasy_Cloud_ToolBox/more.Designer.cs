@@ -28,92 +28,92 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button3 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.button4 = new System.Windows.Forms.Button();
+            this.button_3 = new System.Windows.Forms.Button();
+            this.button_2 = new System.Windows.Forms.Button();
+            this.button_1 = new System.Windows.Forms.Button();
+            this.label_1 = new System.Windows.Forms.Label();
+            this.button_4 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // button3
+            // button_3
             // 
-            this.button3.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button3.Location = new System.Drawing.Point(18, 68);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(225, 50);
-            this.button3.TabIndex = 7;
-            this.button3.Text = "启动教师端";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.button_3.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_3.Location = new System.Drawing.Point(18, 68);
+            this.button_3.Name = "button_3";
+            this.button_3.Size = new System.Drawing.Size(225, 50);
+            this.button_3.TabIndex = 7;
+            this.button_3.Text = "启动教师端";
+            this.button_3.UseVisualStyleBackColor = true;
+            this.button_3.Click += new System.EventHandler(this.button_3_click);
             // 
-            // button2
+            // button_2
             // 
-            this.button2.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button2.Location = new System.Drawing.Point(249, 12);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(225, 50);
-            this.button2.TabIndex = 6;
-            this.button2.Text = "启动学生端";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button_2.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_2.Location = new System.Drawing.Point(249, 12);
+            this.button_2.Name = "button_2";
+            this.button_2.Size = new System.Drawing.Size(225, 50);
+            this.button_2.TabIndex = 6;
+            this.button_2.Text = "启动学生端";
+            this.button_2.UseVisualStyleBackColor = true;
+            this.button_2.Click += new System.EventHandler(this.button_2_click);
             // 
-            // button1
+            // button_1
             // 
-            this.button1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button1.Location = new System.Drawing.Point(18, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(225, 50);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "挂起学生端";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button_1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_1.Location = new System.Drawing.Point(18, 12);
+            this.button_1.Name = "button_1";
+            this.button_1.Size = new System.Drawing.Size(225, 50);
+            this.button_1.TabIndex = 5;
+            this.button_1.Text = "挂起学生端";
+            this.button_1.UseVisualStyleBackColor = true;
+            this.button_1.Click += new System.EventHandler(this.button_1_click);
             // 
-            // label1
+            // label_1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("微软雅黑", 16F);
-            this.label1.Location = new System.Drawing.Point(2, 131);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(488, 30);
-            this.label1.TabIndex = 9;
-            this.label1.Text = "Coryright © 2026 kndxhz. All rights reserved.";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.label_1.AutoSize = true;
+            this.label_1.Font = new System.Drawing.Font("微软雅黑", 16F);
+            this.label_1.Location = new System.Drawing.Point(2, 131);
+            this.label_1.Name = "label_1";
+            this.label_1.Size = new System.Drawing.Size(488, 30);
+            this.label_1.TabIndex = 9;
+            this.label_1.Text = "Coryright © 2026 kndxhz. All rights reserved.";
+            this.label_1.Click += new System.EventHandler(this.label_1_click);
             // 
-            // button4
+            // button_4
             // 
-            this.button4.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button4.Location = new System.Drawing.Point(249, 68);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(225, 50);
-            this.button4.TabIndex = 8;
-            this.button4.Text = "下载工具箱";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button_4.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_4.Location = new System.Drawing.Point(249, 68);
+            this.button_4.Name = "button_4";
+            this.button_4.Size = new System.Drawing.Size(225, 50);
+            this.button_4.TabIndex = 8;
+            this.button_4.Text = "下载工具箱";
+            this.button_4.UseVisualStyleBackColor = true;
+            this.button_4.Click += new System.EventHandler(this.button_4_click);
             // 
             // More
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(492, 170);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.label_1);
+            this.Controls.Add(this.button_4);
+            this.Controls.Add(this.button_3);
+            this.Controls.Add(this.button_2);
+            this.Controls.Add(this.button_1);
             this.MaximizeBox = false;
             this.Name = "More";
             this.Text = "更多工具";
-            this.Load += new System.EventHandler(this.Form2_Load);
+            this.Load += new System.EventHandler(this.more_form_load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button_3;
+        private System.Windows.Forms.Button button_2;
+        private System.Windows.Forms.Button button_1;
+        private System.Windows.Forms.Label label_1;
+        private System.Windows.Forms.Button button_4;
     }
 }

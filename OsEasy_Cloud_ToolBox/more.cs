@@ -21,20 +21,20 @@ namespace OsEasy_Cloud_ToolBox
         private static extern bool CloseHandle(IntPtr hObject);
 
 
-        private const int THREAD_SUSPEND_RESUME = 0x0002;
+        private const int thread_suspend_resume = 0x0002;
 
-        private bool isSuspended = false; // 记录当前是否已挂起
+        private bool is_suspended = false; // 记录当前是否已挂起
         public More()
         {
             InitializeComponent();
         }
 
-        private void Form2_Load(object sender, EventArgs e)
+        private void more_form_load(object sender, EventArgs e)
         {
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button_1_click(object sender, EventArgs e)
         {
 
 
@@ -51,7 +51,7 @@ namespace OsEasy_Cloud_ToolBox
                 }
 
                 // 根据当前状态决定挂起或恢复
-                if (!isSuspended)
+                if (!is_suspended)
                 {
                     foreach (Form form in Application.OpenForms)
                     {
@@ -61,15 +61,15 @@ namespace OsEasy_Cloud_ToolBox
                     // 挂起所有线程
                     foreach (ProcessThread thread in processes[0].Threads)
                     {
-                        IntPtr pOpenThread = OpenThread(THREAD_SUSPEND_RESUME, false, (uint)thread.Id);
+                        IntPtr pOpenThread = OpenThread(thread_suspend_resume, false, (uint)thread.Id);
                         if (pOpenThread == IntPtr.Zero) continue;
 
                         SuspendThread(pOpenThread);
                         CloseHandle(pOpenThread);
                     }
 
-                    isSuspended = true; // 更新状态
-                    this.button1.Text = "恢复学生端";
+                    is_suspended = true; // 更新状态
+                    this.button_1.Text = "恢复学生端";
                     //MessageBox.Show("Student.exe 已成功挂起！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
@@ -77,15 +77,15 @@ namespace OsEasy_Cloud_ToolBox
                     // 恢复所有线程
                     foreach (ProcessThread thread in processes[0].Threads)
                     {
-                        IntPtr pOpenThread = OpenThread(THREAD_SUSPEND_RESUME, false, (uint)thread.Id);
+                        IntPtr pOpenThread = OpenThread(thread_suspend_resume, false, (uint)thread.Id);
                         if (pOpenThread == IntPtr.Zero) continue;
 
                         while (ResumeThread(pOpenThread) > 0) { } // 确保完全恢复
                         CloseHandle(pOpenThread);
                     }
 
-                    isSuspended = false; // 更新状态
-                    this.button1.Text = "挂起学生端";
+                    is_suspended = false; // 更新状态
+                    this.button_1.Text = "挂起学生端";
                     MessageBox.Show("Student.exe 已恢复运行！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
@@ -99,26 +99,26 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void label_1_click(object sender, EventArgs e)
         {
             Process.Start(new ProcessStartInfo("https://kndxhz.cn/") { UseShellExecute = true });
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button_2_click(object sender, EventArgs e)
         {
 
 
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            ProcessStartInfo start_info = new ProcessStartInfo
             {
-                FileName = $"{Main.directory1}\\Student.exe", // 获取当前程序的路径
-                WorkingDirectory = Main.directory1,
+                FileName = $"{Main.directory_1}\\Student.exe", // 获取当前程序的路径
+                WorkingDirectory = Main.directory_1,
                 Arguments = "",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
             };
             try
             {
-                Process.Start(startInfo);
+                Process.Start(start_info);
             }
             catch (Exception ex)
             {
@@ -126,19 +126,19 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void button_3_click(object sender, EventArgs e)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            ProcessStartInfo start_info = new ProcessStartInfo
             {
-                FileName = $"{Main.directory1}\\Teacher.exe", // 获取当前程序的路径
-                WorkingDirectory = Main.directory1,
+                FileName = $"{Main.directory_1}\\Teacher.exe", // 获取当前程序的路径
+                WorkingDirectory = Main.directory_1,
                 Arguments = "",
                 Verb = "runas",                         // 以管理员权限运行
                 UseShellExecute = true                  // 使用外部 shell 启动
             };
             try
             {
-                Process.Start(startInfo);
+                Process.Start(start_info);
             }
             catch (Exception ex)
             {
@@ -146,7 +146,7 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void button_4_click(object sender, EventArgs e)
         {
             MessageBox.Show("此工具箱由 @ZiHaoSaMa66 开发\n这是适用于本地机房的\n由于版本不一样\n可能会有部分功能无法使用",
     "提示",

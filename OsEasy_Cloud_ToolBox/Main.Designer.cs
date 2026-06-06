@@ -29,98 +29,98 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
-            this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.label_1 = new System.Windows.Forms.Label();
+            this.button_1 = new System.Windows.Forms.Button();
+            this.button_2 = new System.Windows.Forms.Button();
+            this.button_3 = new System.Windows.Forms.Button();
+            this.button_4 = new System.Windows.Forms.Button();
+            this.picture_box_1 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.picture_box_1)).BeginInit();
             this.SuspendLayout();
             // 
-            // label1
+            // label_1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(18, 13);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(39, 16);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "一言";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.label_1.AutoSize = true;
+            this.label_1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_1.Location = new System.Drawing.Point(18, 13);
+            this.label_1.Name = "label_1";
+            this.label_1.Size = new System.Drawing.Size(39, 16);
+            this.label_1.TabIndex = 0;
+            this.label_1.Text = "一言";
+            this.label_1.Click += new System.EventHandler(this.label_1_click);
             // 
-            // button1
+            // button_1
             // 
-            this.button1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button1.Location = new System.Drawing.Point(23, 43);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(225, 50);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "关学生端";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button_1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_1.Location = new System.Drawing.Point(23, 43);
+            this.button_1.Name = "button_1";
+            this.button_1.Size = new System.Drawing.Size(225, 50);
+            this.button_1.TabIndex = 1;
+            this.button_1.Text = "关学生端";
+            this.button_1.UseVisualStyleBackColor = true;
+            this.button_1.Click += new System.EventHandler(this.button1_click);
             // 
-            // button2
+            // button_2
             // 
-            this.button2.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button2.Location = new System.Drawing.Point(254, 43);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(225, 50);
-            this.button2.TabIndex = 2;
-            this.button2.Text = "解禁网络";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button_2.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_2.Location = new System.Drawing.Point(254, 43);
+            this.button_2.Name = "button_2";
+            this.button_2.Size = new System.Drawing.Size(225, 50);
+            this.button_2.TabIndex = 2;
+            this.button_2.Text = "解禁网络";
+            this.button_2.UseVisualStyleBackColor = true;
+            this.button_2.Click += new System.EventHandler(this.button2_click);
             // 
-            // button3
+            // button_3
             // 
-            this.button3.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button3.Location = new System.Drawing.Point(23, 99);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(225, 50);
-            this.button3.TabIndex = 3;
-            this.button3.Text = "解禁U盘";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.button_3.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_3.Location = new System.Drawing.Point(23, 99);
+            this.button_3.Name = "button_3";
+            this.button_3.Size = new System.Drawing.Size(225, 50);
+            this.button_3.TabIndex = 3;
+            this.button_3.Text = "解禁U盘";
+            this.button_3.UseVisualStyleBackColor = true;
+            this.button_3.Click += new System.EventHandler(this.button3_click);
             // 
-            // button4
+            // button_4
             // 
-            this.button4.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button4.Location = new System.Drawing.Point(254, 99);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(225, 50);
-            this.button4.TabIndex = 4;
-            this.button4.Text = "更多工具";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button_4.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_4.Location = new System.Drawing.Point(254, 99);
+            this.button_4.Name = "button_4";
+            this.button_4.Size = new System.Drawing.Size(225, 50);
+            this.button_4.TabIndex = 4;
+            this.button_4.Text = "更多工具";
+            this.button_4.UseVisualStyleBackColor = true;
+            this.button_4.Click += new System.EventHandler(this.button4_click);
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(432, 6);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(34, 35);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 5;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.picture_box_1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.picture_box_1.Location = new System.Drawing.Point(432, 6);
+            this.picture_box_1.Name = "picture_box_1";
+            this.picture_box_1.Size = new System.Drawing.Size(34, 35);
+            this.picture_box_1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picture_box_1.TabIndex = 5;
+            this.picture_box_1.TabStop = false;
+            this.picture_box_1.Click += new System.EventHandler(this.picture_box1_click);
             // 
             // Main
             // 
-            this.AcceptButton = this.button1;
+            this.AcceptButton = this.button_1;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(492, 170);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.picture_box_1);
+            this.Controls.Add(this.button_4);
+            this.Controls.Add(this.button_3);
+            this.Controls.Add(this.button_2);
+            this.Controls.Add(this.button_1);
+            this.Controls.Add(this.label_1);
             this.MaximizeBox = false;
             this.Name = "Main";
             this.Text = "OsEasy_Cloud_ToolBox";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.Load += new System.EventHandler(this.main_form_load);
+            ((System.ComponentModel.ISupportInitialize)(this.picture_box_1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -128,12 +128,12 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label_1;
+        private System.Windows.Forms.Button button_1;
+        private System.Windows.Forms.Button button_2;
+        private System.Windows.Forms.Button button_3;
+        private System.Windows.Forms.Button button_4;
+        private System.Windows.Forms.PictureBox picture_box_1;
     }
 }
 

@@ -18,17 +18,17 @@ namespace OsEasy_Cloud_ToolBox
             // System.Diagnostics.Debugger.Launch();
 
             // 先检查并尝试提权
-            if (!IsRunAsAdmin())
+            if (!is_run_as_admin())
             {
                 try
                 {
-                    var startInfo = new ProcessStartInfo
+                    var start_info = new ProcessStartInfo
                     {
                         FileName = Application.ExecutablePath,
                         Verb = "runas",
                         UseShellExecute = true
                     };
-                    Process.Start(startInfo);
+                    Process.Start(start_info);
                 }
                 catch
                 {
@@ -38,17 +38,17 @@ namespace OsEasy_Cloud_ToolBox
             }
 
             // 定义一个唯一的Mutex名称，确保在全局范围内唯一
-            string mutexName = "a25keGh6LmNu";
+            string mutex_name = "a25keGh6LmNu";
 
             // 使用标准单例模式：初始拥有并检查是否新建
-            bool createdNew;
-            using (Mutex mutex = new Mutex(true, mutexName, out createdNew))
+            bool created_new;
+            using (Mutex mutex = new Mutex(true, mutex_name, out created_new))
             {
-                if (!createdNew)
+                if (!created_new)
                 {
                     // 如果Mutex已经存在，说明程序已经在运行
                     // 将焦点切换到已运行的程序窗口
-                    BringExistingInstanceToFront();
+                    bring_existing_instance_to_front();
                     return;
                 }
 
@@ -60,7 +60,7 @@ namespace OsEasy_Cloud_ToolBox
         }
 
         // 检查当前进程是否有管理员权限
-        private static bool IsRunAsAdmin()
+        private static bool is_run_as_admin()
         {
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new WindowsPrincipal(identity);
@@ -70,7 +70,7 @@ namespace OsEasy_Cloud_ToolBox
         /// <summary>
         /// 将已运行的程序窗口带到前台.
         /// </summary>
-        private static void BringExistingInstanceToFront()
+        private static void bring_existing_instance_to_front()
         {
             // 遍历所有打开的窗口，找到我们的应用程序窗口
             foreach (Process process in Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName))
@@ -83,7 +83,7 @@ namespace OsEasy_Cloud_ToolBox
                     if (handle != IntPtr.Zero)
                     {
                         // 显示窗口并设置为前台
-                        ShowWindow(handle, SW_SHOW);
+                        ShowWindow(handle, sw_show);
                         SetForegroundWindow(handle);
                         return;
                     }
@@ -92,7 +92,7 @@ namespace OsEasy_Cloud_ToolBox
         }
 
         // Windows API函数声明
-        private const int SW_SHOW = 5;
+        private const int sw_show = 5;
 
         [DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
