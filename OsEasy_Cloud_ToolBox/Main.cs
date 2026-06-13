@@ -17,7 +17,7 @@ namespace OsEasy_Cloud_ToolBox
         // 存储一系列的句子
         private string[] sentences_list = new string[]
         {
-            "你知道吗：在按钮上右键可以查看帮助（还在逐步完善）",
+            "你知道吗：在按钮上右键可以查看帮助",
             "《机课时间管理》",
             "开源造福人类",
             "锟斤拷烫烫烫",
