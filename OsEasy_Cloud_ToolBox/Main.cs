@@ -308,7 +308,7 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
-        private void button1_click(object sender, EventArgs e)
+        public void button1_click(object sender, EventArgs e)
         {
             this.button_1.Enabled = false;
 

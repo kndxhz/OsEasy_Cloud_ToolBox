@@ -258,6 +258,31 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button_3_click(object sender, EventArgs e)
         {
+            // 学生端正在运行时，先调用“关学生端”逻辑结束它
+            if (Process.GetProcessesByName("Student").Length > 0)
+            {
+                Logger.Info("启动教师端: 检测到学生端正在运行，先调用关学生端逻辑");
+
+                Main main_form = null;
+                foreach (Form form in Application.OpenForms)
+                {
+                    if (form is Main)
+                    {
+                        main_form = (Main)form;
+                        break;
+                    }
+                }
+
+                if (main_form != null)
+                {
+                    main_form.button1_click(sender, e);
+                }
+                else
+                {
+                    Logger.Warn("启动教师端: 未找到主窗口，跳过关闭学生端");
+                }
+            }
+
             ProcessStartInfo process_start_info = new ProcessStartInfo
             {
                 FileName = $"{Main.student_install_dir}\\Teacher.exe", // 获取当前程序的路径
