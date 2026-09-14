@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.label_1 = new System.Windows.Forms.Label();
             this.button_1 = new System.Windows.Forms.Button();
             this.button_2 = new System.Windows.Forms.Button();
@@ -93,9 +92,9 @@
             this.button_4.UseVisualStyleBackColor = true;
             this.button_4.Click += new System.EventHandler(this.button4_click);
             // 
-            // pictureBox1
+            // picture_box_1
             // 
-            this.picture_box_1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.picture_box_1.Image = global::OsEasy_Cloud_ToolBox.Properties.Resources.GitHub_Invertocat_Black;
             this.picture_box_1.Location = new System.Drawing.Point(432, 6);
             this.picture_box_1.Name = "picture_box_1";
             this.picture_box_1.Size = new System.Drawing.Size(34, 35);
