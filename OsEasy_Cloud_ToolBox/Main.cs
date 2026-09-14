@@ -48,6 +48,16 @@ namespace OsEasy_Cloud_ToolBox
         [DllImport("user32.dll")]
         private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
 
+        // 关学生端需要结束的进程列表（与 killer.bat 保持一致）
+        private string[] killer_process_list = new string[]
+        {
+            "Ctsc_Multi.exe", "DeviceControl_x64.exe", "HRMon.exe", "MultiClient.exe",
+            "OActiveII-Client.exe", "OEClient.exe", "OELogSystem.exe", "OEUpdate.exe",
+            "OEProtect.exe", "ProcessProtect.exe", "RunClient.exe", "ServerOSS.exe",
+            "Student.exe", "wfilesvr.exe", "tvnserver.exe", "updatefilesvr.exe",
+            "ScreenRender.exe"
+        };
+
         public Main()
         {
             InitializeComponent();
@@ -290,17 +300,74 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button1_click(object sender, EventArgs e)
         {
-            // 获取当前应用程序的临时目录路径
-            string temp_dir = Path.GetTempPath();
+            this.button_1.Enabled = false;
 
-            // 设定文件路径
-            string file_path = Path.Combine(temp_dir, "killer.bat");
+            // 弹出进度条，异步循环三次结束学生端相关进程
+            ProgressForm progress_form = new ProgressForm("正在关闭学生端", "正在准备...");
+            progress_form.Show(this);
+            set_all_windows_display_affinity(
+                toolbox_is_hide ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
 
-            // 将 Resources 中的 "killer" 文件写入到临时目录
-            File.WriteAllBytes(file_path, Encoding.Default.GetBytes(Properties.Resources.killer));
+            Task.Run(() =>
+            {
+                const int kill_rounds = 3;
+                int total = killer_process_list.Length * kill_rounds;
+                int completed = 0;
+                string error_message = null;
 
-            // 以管理员权限运行该文件
-            run_as_admin(file_path);
+                try
+                {
+                    for (int round = 0; round < kill_rounds; round++)
+                    {
+                        foreach (string process_name in killer_process_list)
+                        {
+                            try
+                            {
+                                ProcessStartInfo start_info = new ProcessStartInfo
+                                {
+                                    FileName = Path.Combine(Environment.SystemDirectory, "taskkill.exe"),
+                                    Arguments = $"/f /IM {process_name}",
+                                    UseShellExecute = false,
+                                    CreateNoWindow = true
+                                };
+                                using (Process process = Process.Start(start_info))
+                                {
+                                    process.WaitForExit();
+                                }
+                            }
+                            catch
+                            {
+                                // 单个进程结束失败不影响整体进度
+                            }
+
+                            completed++;
+                            int percent = completed * 100 / total;
+                            progress_form.SetProgress(percent, $"正在关闭：{process_name}（{completed}/{total}）");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    error_message = ex.Message;
+                }
+
+                this.BeginInvoke(new Action(() =>
+                {
+                    progress_form.SetProgress(100, "完成");
+                    progress_form.Close();
+                    progress_form.Dispose();
+                    this.button_1.Enabled = true;
+
+                    if (error_message == null)
+                    {
+                        MessageBox.Show(this, "学生端相关进程已关闭", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show(this, "关闭学生端失败：\n" + error_message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }));
+            });
         }
 
         public static void run_as_admin(string path)
@@ -321,6 +388,47 @@ namespace OsEasy_Cloud_ToolBox
 
             // 启动进程
             Process.Start(start_info);
+        }
+
+        // 运行程序并等待结束，返回退出码（0 表示成功），同时输出 stdout/stderr
+        private int run_and_wait(string file_name, string arguments, string working_directory, out string output)
+        {
+            ProcessStartInfo start_info = new ProcessStartInfo
+            {
+                FileName = file_name,
+                Arguments = arguments,
+                WorkingDirectory = working_directory,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            StringBuilder output_builder = new StringBuilder();
+            using (Process process = new Process())
+            {
+                process.StartInfo = start_info;
+                process.OutputDataReceived += (s, args) =>
+                {
+                    if (args.Data != null) output_builder.AppendLine(args.Data);
+                };
+                process.ErrorDataReceived += (s, args) =>
+                {
+                    if (args.Data != null) output_builder.AppendLine(args.Data);
+                };
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+                process.WaitForExit();
+                output = output_builder.ToString().Trim();
+                return process.ExitCode;
+            }
+        }
+
+        // 以 cmd 运行 bat 并等待结束
+        private int run_bat_and_wait(string bat_path, out string output)
+        {
+            return run_and_wait("cmd.exe", $"/c \"{bat_path}\"", Path.GetDirectoryName(bat_path), out output);
         }
 
         private string force_get_teacher_ip()
@@ -434,23 +542,40 @@ namespace OsEasy_Cloud_ToolBox
                         }
                     }
                 }
-                ProcessStartInfo start_info = new ProcessStartInfo
+                if (string.IsNullOrEmpty(last_teacher_ip))
                 {
-                    FileName = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
-                    WorkingDirectory = $"{directory_1}\\devicecontrol_x64",
-                    Arguments = $"--type net --operation 0 --extend {last_teacher_ip}",
-                    Verb = "runas",                         // 以管理员权限运行
-                    UseShellExecute = true                  // 使用外部 shell 启动
-                };
+                    MessageBox.Show("未获取到教师机IP，操作已取消。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                string device_control_path = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe";
+                string device_control_dir = $"{directory_1}\\devicecontrol_x64";
                 try
                 {
-                    Process.Start(start_info);
+                    string output;
+                    int exit_code = run_and_wait(
+                        device_control_path,
+                        $"--type net --operation 0 --extend {last_teacher_ip}",
+                        device_control_dir,
+                        out output);
+
+                    if (exit_code == 0)
+                    {
+                        MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            $"解禁网络失败\n返回码：{exit_code}\n程序输出：\n{output}",
+                            "错误",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("目录不存在：\n" + ex.Message);
+                    MessageBox.Show("解禁网络失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else if (chose_unlock_net == DialogResult.No)
             {
@@ -481,23 +606,34 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button3_click(object sender, EventArgs e)
         {
-            ProcessStartInfo start_info = new ProcessStartInfo
-            {
-                FileName = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe", // 获取当前程序的路径
-                WorkingDirectory = $"{directory_1}\\devicecontrol_x64",
-                Arguments = $"--type usb --operation 0 --extend 0.0.0.0",
-                Verb = "runas",                         // 以管理员权限运行
-                UseShellExecute = true                  // 使用外部 shell 启动
-            };
+            string device_control_path = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe";
+            string device_control_dir = $"{directory_1}\\devicecontrol_x64";
             try
             {
-                Process.Start(start_info);
+                string output;
+                int exit_code = run_and_wait(
+                    device_control_path,
+                    "--type usb --operation 0 --extend 0.0.0.0",
+                    device_control_dir,
+                    out output);
+
+                if (exit_code == 0)
+                {
+                    MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"解禁U盘失败\n返回码：{exit_code}\n程序输出：\n{output}",
+                        "错误",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("目录不存在：\n" + ex.Message);
+                MessageBox.Show("解禁U盘失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void picture_box1_click(object sender, EventArgs e)
@@ -534,6 +670,57 @@ namespace OsEasy_Cloud_ToolBox
         private void label_1_click(object sender, EventArgs e)
         {
             Process.Start(new ProcessStartInfo("https://www.kndxhz.cn/") { UseShellExecute = true });
+        }
+
+        // 简单的弹出式进度条窗口，用于异步任务显示进度
+        private class ProgressForm : Form
+        {
+            private ProgressBar progress_bar;
+            private Label progress_label;
+
+            public ProgressForm(string title, string text)
+            {
+                this.Text = title;
+                this.FormBorderStyle = FormBorderStyle.FixedDialog;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.MinimizeBox = false;
+                this.MaximizeBox = false;
+                this.ControlBox = false;
+                this.ShowInTaskbar = false;
+                this.ClientSize = new System.Drawing.Size(360, 100);
+
+                this.progress_label = new Label
+                {
+                    Text = text,
+                    Location = new System.Drawing.Point(12, 15),
+                    AutoSize = true
+                };
+                this.progress_bar = new ProgressBar
+                {
+                    Location = new System.Drawing.Point(12, 45),
+                    Size = new System.Drawing.Size(336, 23),
+                    Minimum = 0,
+                    Maximum = 100
+                };
+
+                this.Controls.Add(this.progress_label);
+                this.Controls.Add(this.progress_bar);
+            }
+
+            public void SetProgress(int value, string text)
+            {
+                if (this.IsDisposed) return;
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() => SetProgress(value, text)));
+                    return;
+                }
+
+                if (value < this.progress_bar.Minimum) value = this.progress_bar.Minimum;
+                if (value > this.progress_bar.Maximum) value = this.progress_bar.Maximum;
+                this.progress_bar.Value = value;
+                if (text != null) this.progress_label.Text = text;
+            }
         }
     }
 }

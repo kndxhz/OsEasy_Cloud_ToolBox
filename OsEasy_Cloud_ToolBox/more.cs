@@ -96,6 +96,18 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button_1_click(object sender, EventArgs e)
         {
+            // 点击后先显示警告信息框，确认后才继续
+            DialogResult confirm_suspend = MessageBox.Show(
+                "点击后程序会隐藏5秒\n然后恢复\n此时教师端看你不是下线\n而是一直卡在隐藏的那个界面\n可以有效规避点名等功能\n此外如果教师端发了文件/发了消息/发起点名\n你也可以再次点击以正常运行\n\n基于Windows API接口实现\n\n是否继续？",
+                "警告",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirm_suspend != DialogResult.Yes)
+            {
+                return;
+            }
+
             // 禁用按钮，防止重复点击
             this.button_1.Enabled = false;
 
