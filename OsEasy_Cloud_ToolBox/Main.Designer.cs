@@ -94,7 +94,6 @@
             // 
             // picture_box_1
             // 
-            this.picture_box_1.Image = global::OsEasy_Cloud_ToolBox.Properties.Resources.GitHub_Invertocat_Black;
             this.picture_box_1.Location = new System.Drawing.Point(432, 6);
             this.picture_box_1.Name = "picture_box_1";
             this.picture_box_1.Size = new System.Drawing.Size(34, 35);

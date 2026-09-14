@@ -59,15 +59,5 @@ namespace OsEasy_Cloud_ToolBox.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
-        /// </summary>
-        internal static System.Drawing.Bitmap GitHub_Invertocat_Black {
-            get {
-                object obj = ResourceManager.GetObject("GitHub_Invertocat_Black", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

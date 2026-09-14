@@ -83,6 +83,7 @@ namespace OsEasy_Cloud_ToolBox
             Logger.Info("主窗口加载");
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
             this.label_1.Text = "";
+            load_github_icon();
             try
             {
                 var process = Process.GetProcessesByName("Student").FirstOrDefault();
@@ -133,6 +134,43 @@ namespace OsEasy_Cloud_ToolBox
         private void main_form_closing(object sender, FormClosingEventArgs e)
         {
             Logger.Info("主窗口关闭（原因: " + e.CloseReason + "），程序即将退出");
+        }
+
+        // 从嵌入资源加载 GitHub 图标，避免 resx 非字符串资源在 Release 下无法显示
+        private void load_github_icon()
+        {
+            try
+            {
+                var assembly = typeof(Main).Assembly;
+                string resource_name = assembly.GetManifestResourceNames()
+                    .FirstOrDefault(name => name.EndsWith("GitHub_Invertocat_Black.png", StringComparison.OrdinalIgnoreCase));
+
+                if (resource_name == null)
+                {
+                    Logger.Warn("未找到 GitHub 图标嵌入资源");
+                    return;
+                }
+
+                using (Stream stream = assembly.GetManifestResourceStream(resource_name))
+                {
+                    if (stream == null)
+                    {
+                        Logger.Warn("GitHub 图标嵌入资源流为空: " + resource_name);
+                        return;
+                    }
+
+                    using (System.Drawing.Image image = System.Drawing.Image.FromStream(stream))
+                    {
+                        this.picture_box_1.Image = new System.Drawing.Bitmap(image);
+                    }
+                }
+
+                Logger.Info("已加载 GitHub 图标: " + resource_name);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("加载 GitHub 图标失败", ex);
+            }
         }
 
         // 将显示关联应用到本程序的所有窗口（含“更多工具”窗口）
