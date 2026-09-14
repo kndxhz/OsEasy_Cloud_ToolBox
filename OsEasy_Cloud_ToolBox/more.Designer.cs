@@ -86,7 +86,7 @@
             this.button_4.Name = "button_4";
             this.button_4.Size = new System.Drawing.Size(225, 50);
             this.button_4.TabIndex = 8;
-            this.button_4.Text = "下载工具箱";
+            this.button_4.Text = "显示本窗口";
             this.button_4.UseVisualStyleBackColor = true;
             this.button_4.Click += new System.EventHandler(this.button_4_click);
             // 

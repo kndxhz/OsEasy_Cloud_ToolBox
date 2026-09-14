@@ -60,6 +60,24 @@ namespace OsEasy_Cloud_ToolBox
             {
                 this.button_1.Text = "挂起学生端";
             }
+
+            // 同步工具箱隐藏状态，并应用到本窗口
+            this.UpdateHideButton();
+            Main.set_all_windows_display_affinity(
+                Main.toolbox_is_hide ? Main.WDA_EXCLUDEFROMCAPTURE : Main.WDA_NONE);
+        }
+
+        // 允许外部线程安全地同步“显示/隐藏”按钮文本
+        public void UpdateHideButton()
+        {
+            if (this.IsDisposed) return;
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => UpdateHideButton()));
+                return;
+            }
+
+            this.button_4.Text = Main.toolbox_is_hide ? "显示本程序" : "隐藏本程序";
         }
 
         // 允许外部线程安全地更新按钮文本
@@ -223,11 +241,43 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button_4_click(object sender, EventArgs e)
         {
-            MessageBox.Show("此工具箱由 @ZiHaoSaMa66 开发\n这是适用于本地机房的\n由于版本不一样\n可能会有部分功能无法使用",
-    "提示",
-    MessageBoxButtons.OK,
-    MessageBoxIcon.Warning);
-            Process.Start(new ProcessStartInfo("https://cn-sy1.rains3.com/xhz/ToolBox%20(1).zip") { UseShellExecute = true });
+            // 找到主窗口，切换时保持所有窗口状态一致
+            Main main_form = null;
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form is Main)
+                {
+                    main_form = (Main)form;
+                    break;
+                }
+            }
+
+            if (Main.toolbox_is_hide)
+            {
+                if (main_form != null)
+                {
+                    main_form.show_toolbox();
+                }
+                else
+                {
+                    Main.toolbox_is_hide = false;
+                    Main.set_all_windows_display_affinity(Main.WDA_NONE);
+                }
+            }
+            else
+            {
+                if (main_form != null)
+                {
+                    main_form.hide_toolbox();
+                }
+                else
+                {
+                    Main.toolbox_is_hide = true;
+                    Main.set_all_windows_display_affinity(Main.WDA_EXCLUDEFROMCAPTURE);
+                }
+            }
+
+            this.UpdateHideButton();
         }
 
 

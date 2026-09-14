@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -37,6 +38,15 @@ namespace OsEasy_Cloud_ToolBox
         private System.Windows.Forms.Timer process_check_timer;
         private int process_check_in_progress = 0;
         public static bool process_is_suspended = false; // 记录学生端是否被挂起
+
+        public static bool toolbox_is_hide = true; // 记录工具箱是否被隐藏
+
+        // SetWindowDisplayAffinity 相关常量
+        public const uint WDA_NONE = 0x00000000;
+        public const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
+
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
 
         public Main()
         {
@@ -100,6 +110,50 @@ namespace OsEasy_Cloud_ToolBox
 
             process_check_timer.Start();
 
+            hide_toolbox();
+
+        }
+
+        // 将显示关联应用到本程序的所有窗口（含“更多工具”窗口）
+        public static void set_all_windows_display_affinity(uint affinity)
+        {
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form == null || !form.IsHandleCreated)
+                {
+                    continue;
+                }
+                try
+                {
+                    SetWindowDisplayAffinity(form.Handle, affinity);
+                }
+                catch
+                {
+                    // 忽略无法设置的窗口
+                }
+            }
+        }
+
+        public void hide_toolbox()
+        {
+            this.Hide();
+            toolbox_is_hide = true;
+            set_all_windows_display_affinity(WDA_EXCLUDEFROMCAPTURE);
+            if (form2_instance != null && !form2_instance.IsDisposed)
+            {
+                form2_instance.UpdateHideButton();
+            }
+        }
+
+        public void show_toolbox()
+        {
+            this.Show();
+            toolbox_is_hide = false;
+            set_all_windows_display_affinity(WDA_NONE);
+            if (form2_instance != null && !form2_instance.IsDisposed)
+            {
+                form2_instance.UpdateHideButton();
+            }
         }
 
         private void process_check_timer_tick(object sender, EventArgs e)
