@@ -22,8 +22,8 @@
 <details>
 <summary>点击展开查看截图</summary>
 
-- 程序主界面</br>![Image](https://github.com/user-attachments/assets/b0a43a48-ba75-4385-b42a-c62a4791fa97)
-- 更多界面</br>![Image](https://github.com/user-attachments/assets/d0f80e0f-81d1-48ad-9891-1931b79260c4)
+- 程序主界面</br>![Image](https://github.com/user-attachments/assets/9e648ea7-7041-4425-a548-3cf7920ddd76)
+- 更多界面</br>![Image](https://github.com/user-attachments/assets/6a73eb65-d508-4bc0-ba72-542c2d46f09a)
 
 </details>
 
