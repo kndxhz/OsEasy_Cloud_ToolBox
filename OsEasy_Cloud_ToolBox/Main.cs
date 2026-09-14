@@ -380,36 +380,6 @@ namespace OsEasy_Cloud_ToolBox
             });
         }
 
-        public static void run_as_admin(string path)
-        {
-            // 检查文件是否存在
-            if (!File.Exists(path))
-            {
-                Logger.Error("要运行的文件不存在: " + path);
-                throw new FileNotFoundException("指定的文件不存在", path);
-            }
-
-            // 设置 ProcessStartInfo 来以管理员权限运行
-            ProcessStartInfo process_start_info = new ProcessStartInfo
-            {
-                FileName = path,        // 要执行的文件路径
-                Verb = "runas",         // 以管理员权限运行
-                UseShellExecute = true  // 使用外部 shell 启动
-            };
-
-            // 启动进程
-            try
-            {
-                Process process = Process.Start(process_start_info);
-                Logger.Info("已以管理员权限启动: " + path + " PID=" + (process != null ? process.Id.ToString() : "unknown"));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("以管理员权限启动失败: " + path, ex);
-                throw;
-            }
-        }
-
         // 运行程序并等待结束，返回退出码（0 表示成功），同时输出 stdout/stderr
         private int run_and_wait(string file_name, string arguments, string working_directory, out string output)
         {
@@ -622,18 +592,27 @@ namespace OsEasy_Cloud_ToolBox
                 // 根据用户选择处理
                 if (reboot_confirm_result == DialogResult.Yes)
                 {
-                    // 获取当前应用程序的临时目录路径
-                    string temp_dir = Path.GetTempPath();
+                    // 直接调用“关学生端”按钮的逻辑结束相关进程
+                    Logger.Info("硬解禁: 直接调用关学生端逻辑");
+                    button1_click(sender, e);
 
-                    // 设定文件路径
-                    string file_path = Path.Combine(temp_dir, "task.bat");
-
-                    // 将 Resources 中的 "task" 文件写入到临时目录
-                    File.WriteAllBytes(file_path, Encoding.Default.GetBytes(Properties.Resources.task));
-                    Logger.Info("硬解禁: 已写入并准备运行 " + file_path);
-
-                    // 以管理员权限运行该文件
-                    run_as_admin(file_path);
+                    // 重启系统
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo(
+                            Path.Combine(Environment.SystemDirectory, "shutdown.exe"),
+                            "/r /f /t 0")
+                        {
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        });
+                        Logger.Info("硬解禁: 已执行 shutdown /r /f /t 0");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error("硬解禁: 重启系统失败", ex);
+                        MessageBox.Show("重启系统失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }

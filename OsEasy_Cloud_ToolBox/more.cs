@@ -135,7 +135,7 @@ namespace OsEasy_Cloud_ToolBox
                         Logger.Warn("挂起/恢复学生端: 未找到 Student 进程");
                         this.Invoke(new Action(() =>
                         {
-                            MessageBox.Show("未找到学生端进程！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show("未找到学生端进程！\n请先启动学生端然后稍等一会", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }));
                         return;
                     }
