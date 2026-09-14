@@ -44,6 +44,7 @@ namespace OsEasy_Cloud_ToolBox
 
         private void more_form_load(object sender, EventArgs e)
         {
+            Logger.Info("更多工具窗口加载，is_suspended=" + is_suspended);
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
             
             // 为按钮添加右键帮助事件
@@ -51,6 +52,9 @@ namespace OsEasy_Cloud_ToolBox
             this.button_2.MouseDown += button_mouse_down;
             this.button_3.MouseDown += button_mouse_down;
             this.button_4.MouseDown += button_mouse_down;
+
+            // 关闭窗口时记录日志
+            this.FormClosing += more_form_closing;
 
             if (is_suspended)
             {
@@ -65,6 +69,11 @@ namespace OsEasy_Cloud_ToolBox
             this.UpdateHideButton();
             Main.set_all_windows_display_affinity(
                 Main.toolbox_is_hide ? Main.WDA_EXCLUDEFROMCAPTURE : Main.WDA_NONE);
+        }
+
+        private void more_form_closing(object sender, FormClosingEventArgs e)
+        {
+            Logger.Info("更多工具窗口关闭（原因: " + e.CloseReason + "）");
         }
 
         // 允许外部线程安全地同步“显示/隐藏”按钮文本
@@ -105,8 +114,11 @@ namespace OsEasy_Cloud_ToolBox
 
             if (confirm_suspend != DialogResult.Yes)
             {
+                Logger.Info("挂起/恢复学生端: 用户取消");
                 return;
             }
+
+            Logger.Info("挂起/恢复学生端: 开始，当前 is_suspended=" + is_suspended);
 
             // 禁用按钮，防止重复点击
             this.button_1.Enabled = false;
@@ -120,12 +132,14 @@ namespace OsEasy_Cloud_ToolBox
                     var processes = Process.GetProcessesByName("Student");
                     if (processes.Length == 0)
                     {
+                        Logger.Warn("挂起/恢复学生端: 未找到 Student 进程");
                         this.Invoke(new Action(() =>
                         {
                             MessageBox.Show("未找到学生端进程！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }));
                         return;
                     }
+                    Logger.Info("挂起/恢复学生端: 找到 " + processes.Length + " 个 Student 进程，PID=" + processes[0].Id);
 
                     // 根据当前状态决定挂起或恢复
                     if (!is_suspended)
@@ -139,18 +153,22 @@ namespace OsEasy_Cloud_ToolBox
                             }
                         }));
 
+                        Logger.Info("挂起学生端: 已隐藏所有窗口，等待 5 秒");
                         Thread.Sleep(5000);
 
                         // 挂起所有线程
+                        int suspended_count = 0;
                         foreach (ProcessThread thread in processes[0].Threads)
                         {
                             IntPtr pOpenThread = OpenThread(thread_suspend_resume, false, (uint)thread.Id);
                             if (pOpenThread == IntPtr.Zero) continue;
 
                             SuspendThread(pOpenThread);
+                            suspended_count++;
                             CloseHandle(pOpenThread);
                         }
 
+                        Logger.Info("挂起学生端: 已挂起 " + suspended_count + " 个线程");
                         is_suspended = true; // 更新状态
                         this.Invoke(new Action(() =>
                         {
@@ -160,15 +178,18 @@ namespace OsEasy_Cloud_ToolBox
                     else
                     {
                         // 恢复所有线程
+                        int resumed_count = 0;
                         foreach (ProcessThread thread in processes[0].Threads)
                         {
                             IntPtr pOpenThread = OpenThread(thread_suspend_resume, false, (uint)thread.Id);
                             if (pOpenThread == IntPtr.Zero) continue;
 
                             while (ResumeThread(pOpenThread) > 0) { } // 确保完全恢复
+                            resumed_count++;
                             CloseHandle(pOpenThread);
                         }
 
+                        Logger.Info("恢复学生端: 已恢复 " + resumed_count + " 个线程");
                         is_suspended = false; // 更新状态
                         this.Invoke(new Action(() =>
                         {
@@ -179,6 +200,7 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 catch (Exception ex)
                 {
+                    Logger.Error("挂起/恢复学生端失败", ex);
                     this.Invoke(new Action(() =>
                     {
                         MessageBox.Show($"发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -206,6 +228,7 @@ namespace OsEasy_Cloud_ToolBox
 
         private void label_1_click(object sender, EventArgs e)
         {
+            Logger.Info("更多工具: 打开网址 https://www.kndxhz.cn/");
             Process.Start(new ProcessStartInfo("https://www.kndxhz.cn/") { UseShellExecute = true });
         }
 
@@ -223,10 +246,12 @@ namespace OsEasy_Cloud_ToolBox
             };
             try
             {
-                Process.Start(start_info);
+                Process process = Process.Start(start_info);
+                Logger.Info("启动学生端: " + start_info.FileName + " PID=" + (process != null ? process.Id.ToString() : "unknown"));
             }
             catch (Exception ex)
             {
+                Logger.Error("启动学生端失败: " + start_info.FileName, ex);
                 MessageBox.Show("目录不存在：\n" + ex.Message);
             }
         }
@@ -243,16 +268,19 @@ namespace OsEasy_Cloud_ToolBox
             };
             try
             {
-                Process.Start(start_info);
+                Process process = Process.Start(start_info);
+                Logger.Info("启动教师端: " + start_info.FileName + " PID=" + (process != null ? process.Id.ToString() : "unknown"));
             }
             catch (Exception ex)
             {
+                Logger.Error("启动教师端失败: " + start_info.FileName, ex);
                 MessageBox.Show("目录不存在：\n" + ex.Message);
             }
         }
 
         private void button_4_click(object sender, EventArgs e)
         {
+            Logger.Info("更多工具: 切换显示/隐藏，当前 toolbox_is_hide=" + Main.toolbox_is_hide);
             // 找到主窗口，切换时保持所有窗口状态一致
             Main main_form = null;
             foreach (Form form in Application.OpenForms)

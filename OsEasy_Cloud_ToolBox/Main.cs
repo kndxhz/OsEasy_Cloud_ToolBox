@@ -48,7 +48,7 @@ namespace OsEasy_Cloud_ToolBox
         [DllImport("user32.dll")]
         private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
 
-        // 关学生端需要结束的进程列表（与 killer.bat 保持一致）
+        // 关学生端需要结束的进程列表
         private string[] killer_process_list = new string[]
         {
             "Ctsc_Multi.exe", "DeviceControl_x64.exe", "HRMon.exe", "MultiClient.exe",
@@ -80,6 +80,7 @@ namespace OsEasy_Cloud_ToolBox
         {
             // 这里不再进行自提权，统一由 Program.Main 处理
 
+            Logger.Info("主窗口加载");
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // 不允许调整大小
             this.label_1.Text = "";
             try
@@ -94,16 +95,21 @@ namespace OsEasy_Cloud_ToolBox
                     throw new InvalidOperationException("学生端进程未找到");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 directory_1 = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
+                Logger.Warn("未找到学生端进程，使用默认目录（" + ex.Message + "）");
             }
+            Logger.Info("工作目录 directory_1 = " + directory_1);
 
             // 为按钮添加右键帮助事件
             this.button_1.MouseDown += button_mouse_down;
             this.button_2.MouseDown += button_mouse_down;
             this.button_3.MouseDown += button_mouse_down;
             this.button_4.MouseDown += button_mouse_down;
+
+            // 关闭窗口时记录日志
+            this.FormClosing += main_form_closing;
 
             // 初始化定时器
             typing_timer = new System.Windows.Forms.Timer();
@@ -124,6 +130,11 @@ namespace OsEasy_Cloud_ToolBox
 
         }
 
+        private void main_form_closing(object sender, FormClosingEventArgs e)
+        {
+            Logger.Info("主窗口关闭（原因: " + e.CloseReason + "），程序即将退出");
+        }
+
         // 将显示关联应用到本程序的所有窗口（含“更多工具”窗口）
         public static void set_all_windows_display_affinity(uint affinity)
         {
@@ -135,11 +146,14 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 try
                 {
-                    SetWindowDisplayAffinity(form.Handle, affinity);
+                    if (!SetWindowDisplayAffinity(form.Handle, affinity))
+                    {
+                        Logger.Warn("设置窗口显示关联失败: " + form.GetType().Name + " affinity=0x" + affinity.ToString("X8"));
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // 忽略无法设置的窗口
+                    Logger.Warn("设置窗口显示关联异常: " + form.GetType().Name + " - " + ex.Message);
                 }
             }
         }
@@ -153,6 +167,7 @@ namespace OsEasy_Cloud_ToolBox
             {
                 form2_instance.UpdateHideButton();
             }
+            Logger.Info("隐藏工具箱（排除屏幕捕获）");
         }
 
         public void show_toolbox()
@@ -164,6 +179,7 @@ namespace OsEasy_Cloud_ToolBox
             {
                 form2_instance.UpdateHideButton();
             }
+            Logger.Info("显示工具箱（恢复屏幕捕获）");
         }
 
         private void process_check_timer_tick(object sender, EventArgs e)
@@ -188,16 +204,6 @@ namespace OsEasy_Cloud_ToolBox
                     }
                     else
                     {
-                        bool is_responding = false;
-                        try
-                        {
-                            is_responding = student_process.Responding;
-                        }
-                        catch
-                        {
-                            is_responding = false;
-                        }
-
                         // 检测进程是否被挂起
                         try
                         {
@@ -242,6 +248,10 @@ namespace OsEasy_Cloud_ToolBox
                     {
                         this.Text = status;
                         // 更新静态状态，供 More 使用
+                        if (process_is_suspended != detected_suspended)
+                        {
+                            Logger.Info("学生端挂起状态变化: " + detected_suspended);
+                        }
                         process_is_suspended = detected_suspended;
 
                         // 如果 More 窗体已打开，更新其按钮文本
@@ -308,6 +318,7 @@ namespace OsEasy_Cloud_ToolBox
             set_all_windows_display_affinity(
                 toolbox_is_hide ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
 
+            Logger.Info("开始关闭学生端（循环 3 次结束进程）");
             Task.Run(() =>
             {
                 const int kill_rounds = 3;
@@ -323,21 +334,17 @@ namespace OsEasy_Cloud_ToolBox
                         {
                             try
                             {
-                                ProcessStartInfo start_info = new ProcessStartInfo
-                                {
-                                    FileName = Path.Combine(Environment.SystemDirectory, "taskkill.exe"),
-                                    Arguments = $"/f /IM {process_name}",
-                                    UseShellExecute = false,
-                                    CreateNoWindow = true
-                                };
-                                using (Process process = Process.Start(start_info))
-                                {
-                                    process.WaitForExit();
-                                }
+                                string kill_output;
+                                run_and_wait(
+                                    Path.Combine(Environment.SystemDirectory, "taskkill.exe"),
+                                    "/f /IM " + process_name,
+                                    null,
+                                    out kill_output);
                             }
-                            catch
+                            catch (Exception ex)
                             {
                                 // 单个进程结束失败不影响整体进度
+                                Logger.Warn("结束进程 " + process_name + " 失败: " + ex.Message);
                             }
 
                             completed++;
@@ -349,6 +356,7 @@ namespace OsEasy_Cloud_ToolBox
                 catch (Exception ex)
                 {
                     error_message = ex.Message;
+                    Logger.Error("关闭学生端失败", ex);
                 }
 
                 this.BeginInvoke(new Action(() =>
@@ -360,10 +368,12 @@ namespace OsEasy_Cloud_ToolBox
 
                     if (error_message == null)
                     {
+                        Logger.Info("学生端相关进程已关闭");
                         MessageBox.Show(this, "学生端相关进程已关闭", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
+                        Logger.Error("关闭学生端失败: " + error_message);
                         MessageBox.Show(this, "关闭学生端失败：\n" + error_message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }));
@@ -375,6 +385,7 @@ namespace OsEasy_Cloud_ToolBox
             // 检查文件是否存在
             if (!File.Exists(path))
             {
+                Logger.Error("要运行的文件不存在: " + path);
                 throw new FileNotFoundException("指定的文件不存在", path);
             }
 
@@ -387,7 +398,16 @@ namespace OsEasy_Cloud_ToolBox
             };
 
             // 启动进程
-            Process.Start(start_info);
+            try
+            {
+                Process process = Process.Start(start_info);
+                Logger.Info("已以管理员权限启动: " + path + " PID=" + (process != null ? process.Id.ToString() : "unknown"));
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("以管理员权限启动失败: " + path, ex);
+                throw;
+            }
         }
 
         // 运行程序并等待结束，返回退出码（0 表示成功），同时输出 stdout/stderr
@@ -404,31 +424,38 @@ namespace OsEasy_Cloud_ToolBox
                 CreateNoWindow = true
             };
 
+            output = "";
             StringBuilder output_builder = new StringBuilder();
-            using (Process process = new Process())
+            Logger.Info("启动外部程序: " + file_name + " " + arguments + "（工作目录: " + working_directory + "）");
+            try
             {
-                process.StartInfo = start_info;
-                process.OutputDataReceived += (s, args) =>
+                using (Process process = new Process())
                 {
-                    if (args.Data != null) output_builder.AppendLine(args.Data);
-                };
-                process.ErrorDataReceived += (s, args) =>
-                {
-                    if (args.Data != null) output_builder.AppendLine(args.Data);
-                };
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                process.WaitForExit();
-                output = output_builder.ToString().Trim();
-                return process.ExitCode;
+                    process.StartInfo = start_info;
+                    process.OutputDataReceived += (s, args) =>
+                    {
+                        if (args.Data != null) output_builder.AppendLine(args.Data);
+                    };
+                    process.ErrorDataReceived += (s, args) =>
+                    {
+                        if (args.Data != null) output_builder.AppendLine(args.Data);
+                    };
+                    process.Start();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                    process.WaitForExit();
+                    output = output_builder.ToString().Trim();
+                    int exit_code = process.ExitCode;
+                    Logger.LogProcessResult(file_name, arguments, exit_code, output);
+                    return exit_code;
+                }
             }
-        }
-
-        // 以 cmd 运行 bat 并等待结束
-        private int run_bat_and_wait(string bat_path, out string output)
-        {
-            return run_and_wait("cmd.exe", $"/c \"{bat_path}\"", Path.GetDirectoryName(bat_path), out output);
+            catch (Exception ex)
+            {
+                output = ex.Message;
+                Logger.Error("外部程序调用失败: " + file_name + " " + arguments, ex);
+                throw;
+            }
         }
 
         private string force_get_teacher_ip()
@@ -479,6 +506,8 @@ namespace OsEasy_Cloud_ToolBox
     "选择方式",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question);
+
+            Logger.Info("解禁网络: 选择=" + (chose_unlock_net == DialogResult.Yes ? "软解禁" : "硬解禁"));
 
             if (chose_unlock_net == DialogResult.Yes)
             {
@@ -542,8 +571,10 @@ namespace OsEasy_Cloud_ToolBox
                         }
                     }
                 }
+                Logger.Info("解禁网络: 教师机IP=" + last_teacher_ip + "，获取方式=" + get_ip_way);
                 if (string.IsNullOrEmpty(last_teacher_ip))
                 {
+                    Logger.Warn("解禁网络: 未获取到教师机IP，操作已取消");
                     MessageBox.Show("未获取到教师机IP，操作已取消。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -561,10 +592,12 @@ namespace OsEasy_Cloud_ToolBox
 
                     if (exit_code == 0)
                     {
+                        Logger.Info("解禁网络成功");
                         MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
+                        Logger.Warn("解禁网络失败，返回码=" + exit_code);
                         MessageBox.Show(
                             $"解禁网络失败\n返回码：{exit_code}\n程序输出：\n{output}",
                             "错误",
@@ -574,6 +607,7 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 catch (Exception ex)
                 {
+                    Logger.Error("解禁网络失败", ex);
                     MessageBox.Show("解禁网络失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -596,6 +630,7 @@ namespace OsEasy_Cloud_ToolBox
 
                     // 将 Resources 中的 "task" 文件写入到临时目录
                     File.WriteAllBytes(file_path, Encoding.Default.GetBytes(Properties.Resources.task));
+                    Logger.Info("硬解禁: 已写入并准备运行 " + file_path);
 
                     // 以管理员权限运行该文件
                     run_as_admin(file_path);
@@ -606,6 +641,7 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button3_click(object sender, EventArgs e)
         {
+            Logger.Info("解禁U盘: 开始");
             string device_control_path = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe";
             string device_control_dir = $"{directory_1}\\devicecontrol_x64";
             try
@@ -619,10 +655,12 @@ namespace OsEasy_Cloud_ToolBox
 
                 if (exit_code == 0)
                 {
+                    Logger.Info("解禁U盘成功");
                     MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
+                    Logger.Warn("解禁U盘失败，返回码=" + exit_code);
                     MessageBox.Show(
                         $"解禁U盘失败\n返回码：{exit_code}\n程序输出：\n{output}",
                         "错误",
@@ -632,12 +670,14 @@ namespace OsEasy_Cloud_ToolBox
             }
             catch (Exception ex)
             {
+                Logger.Error("解禁U盘失败", ex);
                 MessageBox.Show("解禁U盘失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void picture_box1_click(object sender, EventArgs e)
         {
+            Logger.Info("打开网址: https://github.com/kndxhz/OsEasy_Cloud_ToolBox");
             Process.Start(new ProcessStartInfo("https://github.com/kndxhz/OsEasy_Cloud_ToolBox") { UseShellExecute = true });
         }
 
@@ -650,6 +690,7 @@ namespace OsEasy_Cloud_ToolBox
             // 检查实例是否存在且未被释放
             if (form2_instance == null || form2_instance.IsDisposed)
             {
+                Logger.Info("打开更多工具窗口");
                 form2_instance = new More();
                 // 窗体关闭时置空实例
                 form2_instance.FormClosed += (s, args) => form2_instance = null;
@@ -664,11 +705,13 @@ namespace OsEasy_Cloud_ToolBox
                 // 激活并前置窗体
                 form2_instance.BringToFront();
                 form2_instance.Activate();
+                Logger.Info("激活更多工具窗口");
             }
         }
 
         private void label_1_click(object sender, EventArgs e)
         {
+            Logger.Info("打开网址: https://www.kndxhz.cn/");
             Process.Start(new ProcessStartInfo("https://www.kndxhz.cn/") { UseShellExecute = true });
         }
 

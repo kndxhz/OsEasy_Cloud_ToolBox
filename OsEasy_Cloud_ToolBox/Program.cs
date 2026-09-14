@@ -15,10 +15,14 @@ namespace OsEasy_Cloud_ToolBox
         [STAThread] // 标明应用程序是单线程单元 (STA) 模型，通常在UI应用中使用
         static void Main()
         {
+            Logger.StartSession();
+
             // System.Diagnostics.Debugger.Launch();
 
             // 先检查并尝试提权
-            if (!is_run_as_admin())
+            bool is_admin = is_run_as_admin();
+            Logger.Info("程序启动，管理员权限=" + is_admin + "，日志文件=" + Logger.LogPath);
+            if (!is_admin)
             {
                 try
                 {
@@ -29,9 +33,11 @@ namespace OsEasy_Cloud_ToolBox
                         UseShellExecute = true
                     };
                     Process.Start(start_info);
+                    Logger.Info("正在以管理员权限重启: " + Application.ExecutablePath);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Logger.Error("以管理员权限重启失败", ex);
                     MessageBox.Show("本程序需要以管理员权限运行", "需要管理员权限", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 return; // 未提权或已启动提权实例，退出当前进程
@@ -48,14 +54,24 @@ namespace OsEasy_Cloud_ToolBox
                 {
                     // 如果Mutex已经存在，说明程序已经在运行
                     // 将焦点切换到已运行的程序窗口
+                    Logger.Info("检测到已有实例，切换到已运行窗口");
                     bring_existing_instance_to_front();
                     return;
                 }
 
                 // 如果Mutex是新创建的，说明是第一个实例，正常启动程序
+                Logger.Info("创建并运行主窗口");
+
+                Application.ApplicationExit += (s, args) => Logger.Info("应用程序退出（ApplicationExit）");
+                Application.ThreadException += (s, args) => Logger.Error("未处理的UI线程异常", args.Exception);
+                AppDomain.CurrentDomain.UnhandledException += (s, args) =>
+                    Logger.Error("未处理的异常（UnhandledException）", args.ExceptionObject as Exception);
+
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new Main());
+
+                Logger.Info("程序主循环结束，进程即将退出");
             }
         }
 

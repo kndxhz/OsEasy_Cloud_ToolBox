@@ -62,20 +62,6 @@ namespace OsEasy_Cloud_ToolBox.Properties {
         
         /// <summary>
         ///   查找类似 @ECHO OFF
-        ///title OsEasyToolBoxKillerV2
-        ///:awa
-        ///for %%p in (Ctsc_Multi.exe,DeviceControl_x64.exe,HRMon.exe,MultiClient.exe,OActiveII-Client.exe,OEClient.exe,OELogSystem.exe,OEUpdate.exe,OEProtect.exe,ProcessProtect.exe,RunClient.exe,RunClient.exe,ServerOSS.exe,Student.exe,wfilesvr.exe,tvnserver.exe,updatefilesvr.exe,ScreenRender.exe) do taskkill /f /IM %%p
-        ///goto awa
-        /// 的本地化字符串。
-        /// </summary>
-        internal static string killer {
-            get {
-                return ResourceManager.GetString("killer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 @ECHO OFF
         ///:awa
         ///echo ���ڽ������� studentofoseasymulti...
         ///schtasks /Change /TN &quot;studentofoseasymulti&quot; /Disable
