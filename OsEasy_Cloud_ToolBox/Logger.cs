@@ -9,23 +9,23 @@ namespace OsEasy_Cloud_ToolBox
     internal static class Logger
     {
         private static readonly object log_lock = new object();
-        private static readonly string log_path = Path.Combine(Path.GetTempPath(), "OsEasy_Cloud_ToolBox.log");
+        private static readonly string log_file_path = Path.Combine(Path.GetTempPath(), "OsEasy_Cloud_ToolBox.log");
 
         // 单个日志文件的最大体积，超过则在会话开始时清空
-        private const long max_log_size = 2 * 1024 * 1024;
+        private const long max_log_file_size = 2 * 1024 * 1024;
 
         public static string LogPath
         {
-            get { return log_path; }
+            get { return log_file_path; }
         }
 
         public static void StartSession()
         {
             try
             {
-                if (File.Exists(log_path) && new FileInfo(log_path).Length > max_log_size)
+                if (File.Exists(log_file_path) && new FileInfo(log_file_path).Length > max_log_file_size)
                 {
-                    File.Delete(log_path);
+                    File.Delete(log_file_path);
                 }
             }
             catch
@@ -89,7 +89,7 @@ namespace OsEasy_Cloud_ToolBox
 
                 lock (log_lock)
                 {
-                    File.AppendAllText(log_path, line, Encoding.UTF8);
+                    File.AppendAllText(log_file_path, line, Encoding.UTF8);
                 }
             }
             catch

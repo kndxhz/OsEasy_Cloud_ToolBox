@@ -26,13 +26,13 @@ namespace OsEasy_Cloud_ToolBox
             {
                 try
                 {
-                    var start_info = new ProcessStartInfo
+                    var process_start_info = new ProcessStartInfo
                     {
                         FileName = Application.ExecutablePath,
                         Verb = "runas",
                         UseShellExecute = true
                     };
-                    Process.Start(start_info);
+                    Process.Start(process_start_info);
                     Logger.Info("正在以管理员权限重启: " + Application.ExecutablePath);
                 }
                 catch (Exception ex)
@@ -47,10 +47,10 @@ namespace OsEasy_Cloud_ToolBox
             string mutex_name = "a25keGh6LmNu";
 
             // 使用标准单例模式：初始拥有并检查是否新建
-            bool created_new;
-            using (Mutex mutex = new Mutex(true, mutex_name, out created_new))
+            bool created_new_mutex;
+            using (Mutex mutex = new Mutex(true, mutex_name, out created_new_mutex))
             {
-                if (!created_new)
+                if (!created_new_mutex)
                 {
                     // 如果Mutex已经存在，说明程序已经在运行
                     // 将焦点切换到已运行的程序窗口
@@ -94,13 +94,13 @@ namespace OsEasy_Cloud_ToolBox
                 if (process.Id != Process.GetCurrentProcess().Id)
                 {
                     // 获取窗口句柄
-                    IntPtr handle = process.MainWindowHandle;
+                    IntPtr window_handle = process.MainWindowHandle;
 
-                    if (handle != IntPtr.Zero)
+                    if (window_handle != IntPtr.Zero)
                     {
                         // 显示窗口并设置为前台
-                        ShowWindow(handle, sw_show);
-                        SetForegroundWindow(handle);
+                        ShowWindow(window_handle, sw_show);
+                        SetForegroundWindow(window_handle);
                         return;
                     }
                 }

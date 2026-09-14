@@ -6,7 +6,7 @@ namespace OsEasy_Cloud_ToolBox
     internal class show_help
     {
         // Main.cs 按钮帮助信息
-        public static readonly Dictionary<string, HelpInfo> MainButtonHelps = new Dictionary<string, HelpInfo>
+        public static readonly Dictionary<string, HelpInfo> main_button_helps = new Dictionary<string, HelpInfo>
         {
             {
                 "button_1",
@@ -39,7 +39,7 @@ namespace OsEasy_Cloud_ToolBox
         };
 
         // more.cs 按钮帮助信息
-        public static readonly Dictionary<string, HelpInfo> MoreButtonHelps = new Dictionary<string, HelpInfo>
+        public static readonly Dictionary<string, HelpInfo> more_button_helps = new Dictionary<string, HelpInfo>
         {
             {
                 "button_1",
@@ -85,13 +85,13 @@ namespace OsEasy_Cloud_ToolBox
         }
 
         // 显示帮助信息的公共方法
-        public static void ShowHelp(string buttonName, bool isMoreForm = false)
+        public static void ShowHelp(string button_name, bool is_more_form = false)
         {
-            Dictionary<string, HelpInfo> helps = isMoreForm ? MoreButtonHelps : MainButtonHelps;
+            Dictionary<string, HelpInfo> helps = is_more_form ? more_button_helps : main_button_helps;
 
-            if (helps.ContainsKey(buttonName))
+            if (helps.ContainsKey(button_name))
             {
-                HelpInfo help = helps[buttonName];
+                HelpInfo help = helps[button_name];
                 MessageBox.Show(
                     help.Content,
                     $"帮助 - {help.Title}",

@@ -16,7 +16,7 @@ namespace OsEasy_Cloud_ToolBox
     public partial class Main : Form
     {
         // 存储一系列的句子
-        private string[] sentences_list = new string[]
+        private string[] typing_sentences = new string[]
         {
             "你知道吗：在按钮上右键可以查看帮助",
             "《机课时间管理》",
@@ -32,14 +32,14 @@ namespace OsEasy_Cloud_ToolBox
             "互联网大厂都是草台班子"
         };
 
-        private int current_sentence_index = 0; // 当前显示的句子索引
-        private int current_char_index = 0; // 当前句子的字符索引
+        private int sentence_index = 0; // 当前显示的句子索引
+        private int char_index = 0; // 当前句子的字符索引
         private System.Windows.Forms.Timer typing_timer;
         private System.Windows.Forms.Timer process_check_timer;
-        private int process_check_in_progress = 0;
-        public static bool process_is_suspended = false; // 记录学生端是否被挂起
+        private int process_check_running = 0;
+        public static bool student_process_suspended = false; // 记录学生端是否被挂起
 
-        public static bool toolbox_is_hide = true; // 记录工具箱是否被隐藏
+        public static bool toolbox_is_hidden = true; // 记录工具箱是否被隐藏
 
         // SetWindowDisplayAffinity 相关常量
         public const uint WDA_NONE = 0x00000000;
@@ -49,7 +49,7 @@ namespace OsEasy_Cloud_ToolBox
         private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
 
         // 关学生端需要结束的进程列表
-        private string[] killer_process_list = new string[]
+        private string[] student_process_names = new string[]
         {
             "Ctsc_Multi.exe", "DeviceControl_x64.exe", "HRMon.exe", "MultiClient.exe",
             "OActiveII-Client.exe", "OEClient.exe", "OELogSystem.exe", "OEUpdate.exe",
@@ -62,7 +62,7 @@ namespace OsEasy_Cloud_ToolBox
         {
             InitializeComponent();
         }
-        public static string directory_1;
+        public static string student_install_dir;
 
         private void button_mouse_down(object sender, MouseEventArgs e)
         {
@@ -88,7 +88,7 @@ namespace OsEasy_Cloud_ToolBox
                 var process = Process.GetProcessesByName("Student").FirstOrDefault();
                 if (process != null && process.MainModule != null)
                 {
-                    directory_1 = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
+                    student_install_dir = System.IO.Path.GetDirectoryName(process.MainModule.FileName);
                 }
                 else
                 {
@@ -97,10 +97,10 @@ namespace OsEasy_Cloud_ToolBox
             }
             catch (Exception ex)
             {
-                directory_1 = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
+                student_install_dir = "C:\\Program Files (x86)\\Os-Easy\\multimedia network teaching System";
                 Logger.Warn("未找到学生端进程，使用默认目录（" + ex.Message + "）");
             }
-            Logger.Info("工作目录 directory_1 = " + directory_1);
+            Logger.Info("工作目录 student_install_dir = " + student_install_dir);
 
             // 为按钮添加右键帮助事件
             this.button_1.MouseDown += button_mouse_down;
@@ -161,11 +161,11 @@ namespace OsEasy_Cloud_ToolBox
         public void hide_toolbox()
         {
             this.Hide();
-            toolbox_is_hide = true;
+            toolbox_is_hidden = true;
             set_all_windows_display_affinity(WDA_EXCLUDEFROMCAPTURE);
-            if (form2_instance != null && !form2_instance.IsDisposed)
+            if (more_form_instance != null && !more_form_instance.IsDisposed)
             {
-                form2_instance.UpdateHideButton();
+                more_form_instance.UpdateHideButton();
             }
             Logger.Info("隐藏工具箱（排除屏幕捕获）");
         }
@@ -173,11 +173,11 @@ namespace OsEasy_Cloud_ToolBox
         public void show_toolbox()
         {
             this.Show();
-            toolbox_is_hide = false;
+            toolbox_is_hidden = false;
             set_all_windows_display_affinity(WDA_NONE);
-            if (form2_instance != null && !form2_instance.IsDisposed)
+            if (more_form_instance != null && !more_form_instance.IsDisposed)
             {
-                form2_instance.UpdateHideButton();
+                more_form_instance.UpdateHideButton();
             }
             Logger.Info("显示工具箱（恢复屏幕捕获）");
         }
@@ -185,7 +185,7 @@ namespace OsEasy_Cloud_ToolBox
         private void process_check_timer_tick(object sender, EventArgs e)
         {
             // 防止上一次检查尚未完成就再次启动
-            if (Interlocked.Exchange(ref process_check_in_progress, 1) == 1)
+            if (Interlocked.Exchange(ref process_check_running, 1) == 1)
             {
                 return;
             }
@@ -248,18 +248,18 @@ namespace OsEasy_Cloud_ToolBox
                     {
                         this.Text = status;
                         // 更新静态状态，供 More 使用
-                        if (process_is_suspended != detected_suspended)
+                        if (student_process_suspended != detected_suspended)
                         {
                             Logger.Info("学生端挂起状态变化: " + detected_suspended);
                         }
-                        process_is_suspended = detected_suspended;
+                        student_process_suspended = detected_suspended;
 
                         // 如果 More 窗体已打开，更新其按钮文本
                         try
                         {
-                            if (form2_instance != null && !form2_instance.IsDisposed)
+                            if (more_form_instance != null && !more_form_instance.IsDisposed)
                             {
-                                form2_instance.UpdateSuspendButton(detected_suspended);
+                                more_form_instance.UpdateSuspendButton(detected_suspended);
                             }
                         }
                         catch { }
@@ -267,7 +267,7 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 catch { }
 
-                Interlocked.Exchange(ref process_check_in_progress, 0);
+                Interlocked.Exchange(ref process_check_running, 0);
             });
         }
         
@@ -275,11 +275,11 @@ namespace OsEasy_Cloud_ToolBox
         private void typing_timer_tick(object sender, EventArgs e)
         {
             // 判断当前句子是否已显示完
-            if (current_char_index < sentences_list[current_sentence_index].Length)
+            if (char_index < typing_sentences[sentence_index].Length)
             {
                 // 将下一个字符添加到 label1
-                this.label_1.Text += sentences_list[current_sentence_index][current_char_index];
-                current_char_index++; // 移动到下一个字符
+                this.label_1.Text += typing_sentences[sentence_index][char_index];
+                char_index++; // 移动到下一个字符
             }
             else
             {
@@ -293,11 +293,11 @@ namespace OsEasy_Cloud_ToolBox
                 {
                     // 重新设置定时器，显示下一个句子
                     switch_sentence_timer.Stop();
-                    current_char_index = 0; // 重置字符索引
-                    current_sentence_index++; // 切换到下一个句子
-                    if (current_sentence_index >= sentences_list.Length)
+                    char_index = 0; // 重置字符索引
+                    sentence_index++; // 切换到下一个句子
+                    if (sentence_index >= typing_sentences.Length)
                     {
-                        current_sentence_index = 0; // 如果到了最后一条，重新从头开始
+                        sentence_index = 0; // 如果到了最后一条，重新从头开始
                     }
 
                     // 清空 label 并开始新的打字效果
@@ -316,13 +316,13 @@ namespace OsEasy_Cloud_ToolBox
             ProgressForm progress_form = new ProgressForm("正在关闭学生端", "正在准备...");
             progress_form.Show(this);
             set_all_windows_display_affinity(
-                toolbox_is_hide ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+                toolbox_is_hidden ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
 
             Logger.Info("开始关闭学生端（循环 3 次结束进程）");
             Task.Run(() =>
             {
                 const int kill_rounds = 3;
-                int total = killer_process_list.Length * kill_rounds;
+                int total = student_process_names.Length * kill_rounds;
                 int completed = 0;
                 string error_message = null;
 
@@ -330,7 +330,7 @@ namespace OsEasy_Cloud_ToolBox
                 {
                     for (int round = 0; round < kill_rounds; round++)
                     {
-                        foreach (string process_name in killer_process_list)
+                        foreach (string process_name in student_process_names)
                         {
                             try
                             {
@@ -390,7 +390,7 @@ namespace OsEasy_Cloud_ToolBox
             }
 
             // 设置 ProcessStartInfo 来以管理员权限运行
-            ProcessStartInfo start_info = new ProcessStartInfo
+            ProcessStartInfo process_start_info = new ProcessStartInfo
             {
                 FileName = path,        // 要执行的文件路径
                 Verb = "runas",         // 以管理员权限运行
@@ -400,7 +400,7 @@ namespace OsEasy_Cloud_ToolBox
             // 启动进程
             try
             {
-                Process process = Process.Start(start_info);
+                Process process = Process.Start(process_start_info);
                 Logger.Info("已以管理员权限启动: " + path + " PID=" + (process != null ? process.Id.ToString() : "unknown"));
             }
             catch (Exception ex)
@@ -413,7 +413,7 @@ namespace OsEasy_Cloud_ToolBox
         // 运行程序并等待结束，返回退出码（0 表示成功），同时输出 stdout/stderr
         private int run_and_wait(string file_name, string arguments, string working_directory, out string output)
         {
-            ProcessStartInfo start_info = new ProcessStartInfo
+            ProcessStartInfo process_start_info = new ProcessStartInfo
             {
                 FileName = file_name,
                 Arguments = arguments,
@@ -431,7 +431,7 @@ namespace OsEasy_Cloud_ToolBox
             {
                 using (Process process = new Process())
                 {
-                    process.StartInfo = start_info;
+                    process.StartInfo = process_start_info;
                     process.OutputDataReceived += (s, args) =>
                     {
                         if (args.Data != null) output_builder.AppendLine(args.Data);
@@ -500,93 +500,93 @@ namespace OsEasy_Cloud_ToolBox
 
         private void button2_click(object sender, EventArgs e)
         {
-            string get_ip_way = "";
-            DialogResult chose_unlock_net = MessageBox.Show(
+            string teacher_ip_source = "";
+            DialogResult unlock_net_choice = MessageBox.Show(
     "请选择你要解禁的方式\n是：软解禁（推荐）\n否：硬解禁（不推荐）",
     "选择方式",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question);
 
-            Logger.Info("解禁网络: 选择=" + (chose_unlock_net == DialogResult.Yes ? "软解禁" : "硬解禁"));
+            Logger.Info("解禁网络: 选择=" + (unlock_net_choice == DialogResult.Yes ? "软解禁" : "硬解禁"));
 
-            if (chose_unlock_net == DialogResult.Yes)
+            if (unlock_net_choice == DialogResult.Yes)
             {
-                string file_path = $"{directory_1}\\vdi_channel.log";
-                string last_teacher_ip = null;
+                string file_path = $"{student_install_dir}\\vdi_channel.log";
+                string teacher_ip = null;
                 // 调整正则表达式更严格的IP格式验证
-                Regex ip_regex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))", RegexOptions.Compiled);
+                Regex teacher_ip_regex = new Regex(@"teacher_ip:((?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))", RegexOptions.Compiled);
 
                 try
                 {
                     foreach (string line in File.ReadLines(file_path))
                     {
-                        MatchCollection matches = ip_regex.Matches(line);
+                        MatchCollection matches = teacher_ip_regex.Matches(line);
                         if (matches.Count > 0)
                         {
                             // 修改为兼容C# 7.3的写法
-                            last_teacher_ip = matches[matches.Count - 1].Groups[1].Value;
+                            teacher_ip = matches[matches.Count - 1].Groups[1].Value;
                         }
                     }
-                    get_ip_way = "读取日志匹配正则";
+                    teacher_ip_source = "读取日志匹配正则";
 
                 }
                 catch (FileNotFoundException)
                 {
-                    last_teacher_ip = force_get_teacher_ip();
-                    get_ip_way = "直接读取ip";
+                    teacher_ip = force_get_teacher_ip();
+                    teacher_ip_source = "直接读取ip";
                 }
                 catch (Exception)
                 {
-                    last_teacher_ip = force_get_teacher_ip();
-                    get_ip_way = "直接读取ip";
+                    teacher_ip = force_get_teacher_ip();
+                    teacher_ip_source = "直接读取ip";
                 }
 
-                if (last_teacher_ip == null)
+                if (teacher_ip == null)
                 {
                     MessageBox.Show("ip两种方式都获取失败，请手动输入教师机ip！！！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    string input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
-                    if (!string.IsNullOrEmpty(input))
+                    string manual_ip_input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
+                    if (!string.IsNullOrEmpty(manual_ip_input))
                     {
-                        last_teacher_ip = input;
+                        teacher_ip = manual_ip_input;
                     }
                 }
                 else
                 {
                     //MessageBox.show
-                    DialogResult confirm_ip = MessageBox.Show(
-            $"获取到的教师机ip：{last_teacher_ip}\n读取方式：{get_ip_way}\n是否正确？",  // 消息内容
+                    DialogResult ip_confirm_result = MessageBox.Show(
+            $"获取到的教师机ip：{teacher_ip}\n读取方式：{teacher_ip_source}\n是否正确？",  // 消息内容
             "IP",                          // 标题
             MessageBoxButtons.YesNo,          // 显示"是"和"否"按钮
             MessageBoxIcon.Question);          // 警告图标
-                    if (confirm_ip == DialogResult.Yes)
+                    if (ip_confirm_result == DialogResult.Yes)
                     {
                         // do nothing
                     }
                     else
                     {
-                        string input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
-                        if (!string.IsNullOrEmpty(input))
+                        string manual_ip_input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
+                        if (!string.IsNullOrEmpty(manual_ip_input))
                         {
-                            last_teacher_ip = input;
+                            teacher_ip = manual_ip_input;
                         }
                     }
                 }
-                Logger.Info("解禁网络: 教师机IP=" + last_teacher_ip + "，获取方式=" + get_ip_way);
-                if (string.IsNullOrEmpty(last_teacher_ip))
+                Logger.Info("解禁网络: 教师机IP=" + teacher_ip + "，获取方式=" + teacher_ip_source);
+                if (string.IsNullOrEmpty(teacher_ip))
                 {
                     Logger.Warn("解禁网络: 未获取到教师机IP，操作已取消");
                     MessageBox.Show("未获取到教师机IP，操作已取消。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                string device_control_path = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe";
-                string device_control_dir = $"{directory_1}\\devicecontrol_x64";
+                string device_control_path = $"{student_install_dir}\\devicecontrol_x64\\DeviceControl_x64.exe";
+                string device_control_dir = $"{student_install_dir}\\devicecontrol_x64";
                 try
                 {
                     string output;
                     int exit_code = run_and_wait(
                         device_control_path,
-                        $"--type net --operation 0 --extend {last_teacher_ip}",
+                        $"--type net --operation 0 --extend {teacher_ip}",
                         device_control_dir,
                         out output);
 
@@ -611,16 +611,16 @@ namespace OsEasy_Cloud_ToolBox
                     MessageBox.Show("解禁网络失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            else if (chose_unlock_net == DialogResult.No)
+            else if (unlock_net_choice == DialogResult.No)
             {
-                DialogResult confirm_status = MessageBox.Show(
+                DialogResult reboot_confirm_result = MessageBox.Show(
             "此操作将会重启系统\n你确定吗？",  // 消息内容
             "警告",                          // 标题
             MessageBoxButtons.YesNo,          // 显示"是"和"否"按钮
             MessageBoxIcon.Warning);          // 警告图标
 
                 // 根据用户选择处理
-                if (confirm_status == DialogResult.Yes)
+                if (reboot_confirm_result == DialogResult.Yes)
                 {
                     // 获取当前应用程序的临时目录路径
                     string temp_dir = Path.GetTempPath();
@@ -642,8 +642,8 @@ namespace OsEasy_Cloud_ToolBox
         private void button3_click(object sender, EventArgs e)
         {
             Logger.Info("解禁U盘: 开始");
-            string device_control_path = $"{directory_1}\\devicecontrol_x64\\DeviceControl_x64.exe";
-            string device_control_dir = $"{directory_1}\\devicecontrol_x64";
+            string device_control_path = $"{student_install_dir}\\devicecontrol_x64\\DeviceControl_x64.exe";
+            string device_control_dir = $"{student_install_dir}\\devicecontrol_x64";
             try
             {
                 string output;
@@ -682,29 +682,29 @@ namespace OsEasy_Cloud_ToolBox
         }
 
 
-        private More form2_instance = null;
+        private More more_form_instance = null;
         private void button4_click(object sender, EventArgs e)
         {
 
 
             // 检查实例是否存在且未被释放
-            if (form2_instance == null || form2_instance.IsDisposed)
+            if (more_form_instance == null || more_form_instance.IsDisposed)
             {
                 Logger.Info("打开更多工具窗口");
-                form2_instance = new More();
+                more_form_instance = new More();
                 // 窗体关闭时置空实例
-                form2_instance.FormClosed += (s, args) => form2_instance = null;
-                form2_instance.Show();
+                more_form_instance.FormClosed += (s, args) => more_form_instance = null;
+                more_form_instance.Show();
             }
             else
             {
                 // 恢复最小化的窗体
-                if (form2_instance.WindowState == FormWindowState.Minimized)
-                    form2_instance.WindowState = FormWindowState.Normal;
+                if (more_form_instance.WindowState == FormWindowState.Minimized)
+                    more_form_instance.WindowState = FormWindowState.Normal;
 
                 // 激活并前置窗体
-                form2_instance.BringToFront();
-                form2_instance.Activate();
+                more_form_instance.BringToFront();
+                more_form_instance.Activate();
                 Logger.Info("激活更多工具窗口");
             }
         }
