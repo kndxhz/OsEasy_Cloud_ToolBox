@@ -173,6 +173,24 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
+        // 为指定窗口设置显示关联（供 MessageBoxHelper 等对弹窗调用）
+        public static bool apply_display_affinity(IntPtr h_wnd, uint affinity)
+        {
+            if (h_wnd == IntPtr.Zero)
+            {
+                return false;
+            }
+            try
+            {
+                return SetWindowDisplayAffinity(h_wnd, affinity);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn("设置窗口显示关联异常: hwnd=0x" + h_wnd.ToString("X") + " - " + ex.Message);
+                return false;
+            }
+        }
+
         // 将显示关联应用到本程序的所有窗口（含“更多工具”窗口）
         public static void set_all_windows_display_affinity(uint affinity)
         {
@@ -182,16 +200,9 @@ namespace OsEasy_Cloud_ToolBox
                 {
                     continue;
                 }
-                try
+                if (!apply_display_affinity(form.Handle, affinity))
                 {
-                    if (!SetWindowDisplayAffinity(form.Handle, affinity))
-                    {
-                        Logger.Warn("设置窗口显示关联失败: " + form.GetType().Name + " affinity=0x" + affinity.ToString("X8"));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warn("设置窗口显示关联异常: " + form.GetType().Name + " - " + ex.Message);
+                    Logger.Warn("设置窗口显示关联失败: " + form.GetType().Name + " affinity=0x" + affinity.ToString("X8"));
                 }
             }
         }
@@ -407,12 +418,12 @@ namespace OsEasy_Cloud_ToolBox
                     if (error_message == null)
                     {
                         Logger.Info("学生端相关进程已关闭");
-                        MessageBox.Show(this, "学生端相关进程已关闭", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBoxHelper.Show(this, "学生端相关进程已关闭", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
                         Logger.Error("关闭学生端失败: " + error_message);
-                        MessageBox.Show(this, "关闭学生端失败：\n" + error_message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBoxHelper.Show(this, "关闭学生端失败：\n" + error_message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }));
             });
@@ -495,13 +506,13 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 else
                 {
-                    MessageBox.Show("本地 IP 不是 IPv4 地址。");
+                    MessageBoxHelper.Show("本地 IP 不是 IPv4 地址。");
                     return "";
                 }
             }
             else
             {
-                MessageBox.Show("未找到 192.168 开头的 IPv4 地址。");
+                MessageBoxHelper.Show("未找到 192.168 开头的 IPv4 地址。");
                 return "";
             }
         }
@@ -509,7 +520,7 @@ namespace OsEasy_Cloud_ToolBox
         private void button2_click(object sender, EventArgs e)
         {
             string teacher_ip_source = "";
-            DialogResult unlock_net_choice = MessageBox.Show(
+            DialogResult unlock_net_choice = MessageBoxHelper.Show(
     "请选择你要解禁的方式\n是：软解禁（推荐）\n否：硬解禁（不推荐）",
     "选择方式",
     MessageBoxButtons.YesNo,
@@ -551,8 +562,9 @@ namespace OsEasy_Cloud_ToolBox
 
                 if (teacher_ip == null)
                 {
-                    MessageBox.Show("ip两种方式都获取失败，请手动输入教师机ip！！！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    string manual_ip_input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
+                    MessageBoxHelper.Show("ip两种方式都获取失败，请手动输入教师机ip！！！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string manual_ip_input = MessageBoxHelper.run_with_capture_protection(
+                        () => Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1));
                     if (!string.IsNullOrEmpty(manual_ip_input))
                     {
                         teacher_ip = manual_ip_input;
@@ -561,7 +573,7 @@ namespace OsEasy_Cloud_ToolBox
                 else
                 {
                     //MessageBox.show
-                    DialogResult ip_confirm_result = MessageBox.Show(
+                    DialogResult ip_confirm_result = MessageBoxHelper.Show(
             $"获取到的教师机ip：{teacher_ip}\n读取方式：{teacher_ip_source}\n是否正确？",  // 消息内容
             "IP",                          // 标题
             MessageBoxButtons.YesNo,          // 显示"是"和"否"按钮
@@ -572,7 +584,8 @@ namespace OsEasy_Cloud_ToolBox
                     }
                     else
                     {
-                        string manual_ip_input = Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1);
+                        string manual_ip_input = MessageBoxHelper.run_with_capture_protection(
+                            () => Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1));
                         if (!string.IsNullOrEmpty(manual_ip_input))
                         {
                             teacher_ip = manual_ip_input;
@@ -583,7 +596,7 @@ namespace OsEasy_Cloud_ToolBox
                 if (string.IsNullOrEmpty(teacher_ip))
                 {
                     Logger.Warn("解禁网络: 未获取到教师机IP，操作已取消");
-                    MessageBox.Show("未获取到教师机IP，操作已取消。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxHelper.Show("未获取到教师机IP，操作已取消。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -601,12 +614,12 @@ namespace OsEasy_Cloud_ToolBox
                     if (exit_code == 0)
                     {
                         Logger.Info("解禁网络成功");
-                        MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBoxHelper.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
                         Logger.Warn("解禁网络失败，返回码=" + exit_code);
-                        MessageBox.Show(
+                        MessageBoxHelper.Show(
                             $"解禁网络失败\n返回码：{exit_code}\n程序输出：\n{output}",
                             "错误",
                             MessageBoxButtons.OK,
@@ -616,12 +629,12 @@ namespace OsEasy_Cloud_ToolBox
                 catch (Exception ex)
                 {
                     Logger.Error("解禁网络失败", ex);
-                    MessageBox.Show("解禁网络失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxHelper.Show("解禁网络失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else if (unlock_net_choice == DialogResult.No)
             {
-                DialogResult reboot_confirm_result = MessageBox.Show(
+                DialogResult reboot_confirm_result = MessageBoxHelper.Show(
             "此操作将会重启系统\n你确定吗？",  // 消息内容
             "警告",                          // 标题
             MessageBoxButtons.YesNo,          // 显示"是"和"否"按钮
@@ -649,7 +662,7 @@ namespace OsEasy_Cloud_ToolBox
                     catch (Exception ex)
                     {
                         Logger.Error("硬解禁: 重启系统失败", ex);
-                        MessageBox.Show("重启系统失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBoxHelper.Show("重启系统失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -673,12 +686,12 @@ namespace OsEasy_Cloud_ToolBox
                 if (exit_code == 0)
                 {
                     Logger.Info("解禁U盘成功");
-                    MessageBox.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBoxHelper.Show("执行成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
                     Logger.Warn("解禁U盘失败，返回码=" + exit_code);
-                    MessageBox.Show(
+                    MessageBoxHelper.Show(
                         $"解禁U盘失败\n返回码：{exit_code}\n程序输出：\n{output}",
                         "错误",
                         MessageBoxButtons.OK,
@@ -688,7 +701,7 @@ namespace OsEasy_Cloud_ToolBox
             catch (Exception ex)
             {
                 Logger.Error("解禁U盘失败", ex);
-                MessageBox.Show("解禁U盘失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxHelper.Show("解禁U盘失败：\n" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

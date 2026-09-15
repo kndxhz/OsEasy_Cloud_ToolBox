@@ -108,7 +108,7 @@ namespace OsEasy_Cloud_ToolBox
             // 点击后先显示警告信息框，确认后才继续
             if (!student_suspended)
             {
-                DialogResult suspend_confirm_result = MessageBox.Show(
+                DialogResult suspend_confirm_result = MessageBoxHelper.Show(
                                 "点击后程序会隐藏5秒\n然后恢复\n此时教师端看你不是下线\n而是一直卡在隐藏的那个界面\n可以有效规避点名等功能\n此外如果教师端发了文件/发了消息/发起点名\n你也可以再次点击以正常运行\n\n基于Windows API接口实现\n\n是否继续？",
                                 "警告",
                                 MessageBoxButtons.YesNo,
@@ -139,7 +139,7 @@ namespace OsEasy_Cloud_ToolBox
                         Logger.Warn("挂起/恢复学生端: 未找到 Student 进程");
                         this.Invoke(new Action(() =>
                         {
-                            MessageBox.Show("未找到学生端进程！\n请先启动学生端然后稍等一会", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBoxHelper.Show("未找到学生端进程！\n请先启动学生端然后稍等一会", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }));
                         return;
                     }
@@ -198,7 +198,7 @@ namespace OsEasy_Cloud_ToolBox
                         this.Invoke(new Action(() =>
                         {
                             this.button_1.Text = "挂起学生端";
-                            MessageBox.Show("学生端已恢复运行！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBoxHelper.Show("学生端已恢复运行！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }));
                     }
                 }
@@ -207,7 +207,7 @@ namespace OsEasy_Cloud_ToolBox
                     Logger.Error("挂起/恢复学生端失败", ex);
                     this.Invoke(new Action(() =>
                     {
-                        MessageBox.Show($"发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBoxHelper.Show($"发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }));
                 }
                 finally
@@ -256,7 +256,7 @@ namespace OsEasy_Cloud_ToolBox
             catch (Exception ex)
             {
                 Logger.Error("启动学生端失败: " + process_start_info.FileName, ex);
-                MessageBox.Show("目录不存在：\n" + ex.Message);
+                MessageBoxHelper.Show("目录不存在：\n" + ex.Message);
             }
         }
 
@@ -303,7 +303,7 @@ namespace OsEasy_Cloud_ToolBox
             catch (Exception ex)
             {
                 Logger.Error("启动教师端失败: " + process_start_info.FileName, ex);
-                MessageBox.Show("目录不存在：\n" + ex.Message);
+                MessageBoxHelper.Show("目录不存在：\n" + ex.Message);
             }
         }
 

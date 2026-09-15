@@ -92,7 +92,7 @@ namespace OsEasy_Cloud_ToolBox
             if (helps.ContainsKey(button_name))
             {
                 HelpInfo help = helps[button_name];
-                MessageBox.Show(
+                MessageBoxHelper.Show(
                     help.Content,
                     $"帮助 - {help.Title}",
                     MessageBoxButtons.OK,

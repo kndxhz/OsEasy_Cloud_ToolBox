@@ -38,7 +38,7 @@ namespace OsEasy_Cloud_ToolBox
                 catch (Exception ex)
                 {
                     Logger.Error("以管理员权限重启失败", ex);
-                    MessageBox.Show("本程序需要以管理员权限运行", "需要管理员权限", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxHelper.Show("本程序需要以管理员权限运行", "需要管理员权限", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 return; // 未提权或已启动提权实例，退出当前进程
             }
