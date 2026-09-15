@@ -390,6 +390,11 @@ jobs:
               $authorEmail = $parts[3]
               $subject = $parts[4]
 
+              if ($subject -match '^chore:\s*set version\s+\d+\.\d+\.\d+\.\d+$') {
+                  Write-Host "隐藏自动版本 Commit：$fullHash $subject"
+                  continue
+              }
+
               # ========================================================
               # 获取 GitHub 用户名
               # ========================================================
