@@ -198,7 +198,7 @@ namespace OsEasy_Cloud_ToolBox
 
         public void hide_toolbox()
         {
-            this.Hide();
+            //this.Hide();
             toolbox_is_hidden = true;
             set_all_windows_display_affinity(WDA_EXCLUDEFROMCAPTURE);
             if (more_form_instance != null && !more_form_instance.IsDisposed)
@@ -210,7 +210,7 @@ namespace OsEasy_Cloud_ToolBox
 
         public void show_toolbox()
         {
-            this.Show();
+            //this.Show();
             toolbox_is_hidden = false;
             set_all_windows_display_affinity(WDA_NONE);
             if (more_form_instance != null && !more_form_instance.IsDisposed)
