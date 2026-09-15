@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OsEasy_Cloud_ToolBox
@@ -260,12 +261,12 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
-        private void button_3_click(object sender, EventArgs e)
+        private async void button_3_click(object sender, EventArgs e)
         {
-            // 学生端正在运行时，先调用“关学生端”逻辑结束它
+            // 学生端正在运行时，先同步关闭它，关闭完成后才启动教师端
             if (Process.GetProcessesByName("Student").Length > 0)
             {
-                Logger.Info("启动教师端: 检测到学生端正在运行，先调用关学生端逻辑");
+                Logger.Info("启动教师端: 检测到学生端正在运行，同步关闭学生端");
 
                 Main main_form = null;
                 foreach (Form form in Application.OpenForms)
@@ -279,7 +280,22 @@ namespace OsEasy_Cloud_ToolBox
 
                 if (main_form != null)
                 {
-                    main_form.button1_click(sender, e);
+                    this.button_3.Enabled = false;
+                    bool closed;
+                    try
+                    {
+                        closed = await main_form.close_student_processes_with_progress_async();
+                    }
+                    finally
+                    {
+                        this.button_3.Enabled = true;
+                    }
+
+                    if (!closed)
+                    {
+                        Logger.Warn("启动教师端: 关闭学生端失败，取消启动");
+                        return;
+                    }
                 }
                 else
                 {

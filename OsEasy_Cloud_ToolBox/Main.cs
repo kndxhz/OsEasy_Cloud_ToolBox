@@ -359,6 +359,15 @@ namespace OsEasy_Cloud_ToolBox
 
         public void button1_click(object sender, EventArgs e)
         {
+            // 忽略返回值，进度与结果提示由该方法内部处理
+            _ = close_student_processes_with_progress_async();
+        }
+
+        // 弹出进度条并关闭学生端相关进程。
+        // 返回 true 表示关闭成功，false 表示失败。
+        // 供“关学生端”按钮以及“启动教师端”前的同步关闭复用。
+        public async Task<bool> close_student_processes_with_progress_async()
+        {
             this.button_1.Enabled = false;
 
             // 弹出进度条，异步循环三次结束学生端相关进程
@@ -367,66 +376,76 @@ namespace OsEasy_Cloud_ToolBox
             set_all_windows_display_affinity(
                 toolbox_is_hidden ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
 
+            string error_message = await Task.Run(() => close_student_processes_sync(
+                (percent, text) => progress_form.SetProgress(percent, text)));
+
+            progress_form.SetProgress(100, "完成");
+            progress_form.Close();
+            progress_form.Dispose();
+            this.button_1.Enabled = true;
+
+            if (error_message == null)
+            {
+                Logger.Info("学生端相关进程已关闭");
+                MessageBoxHelper.Show(this, "学生端相关进程已关闭", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return true;
+            }
+            else
+            {
+                Logger.Error("关闭学生端失败: " + error_message);
+                MessageBoxHelper.Show(this, "关闭学生端失败：\n" + error_message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        // 同步循环关闭学生端相关进程，返回 null 表示成功，否则返回错误信息。
+        // on_progress 可选，用于报告进度（percent 0-100, 描述文本）。
+        public string close_student_processes_sync(Action<int, string> on_progress = null)
+        {
             Logger.Info("开始关闭学生端（循环 3 次结束进程）");
-            Task.Run(() =>
+            string error_message = null;
+
+            try
             {
                 const int kill_rounds = 3;
                 int total = student_process_names.Length * kill_rounds;
                 int completed = 0;
-                string error_message = null;
 
-                try
+                for (int round = 0; round < kill_rounds; round++)
                 {
-                    for (int round = 0; round < kill_rounds; round++)
+                    foreach (string process_name in student_process_names)
                     {
-                        foreach (string process_name in student_process_names)
+                        try
                         {
-                            try
-                            {
-                                string kill_output;
-                                run_and_wait(
-                                    Path.Combine(Environment.SystemDirectory, "taskkill.exe"),
-                                    "/f /IM " + process_name,
-                                    null,
-                                    out kill_output);
-                            }
-                            catch (Exception ex)
-                            {
-                                // 单个进程结束失败不影响整体进度
-                                Logger.Warn("结束进程 " + process_name + " 失败: " + ex.Message);
-                            }
+                            string kill_output;
+                            run_and_wait(
+                                Path.Combine(Environment.SystemDirectory, "taskkill.exe"),
+                                "/f /IM " + process_name,
+                                null,
+                                out kill_output);
+                        }
+                        catch (Exception ex)
+                        {
+                            // 单个进程结束失败不影响整体进度
+                            Logger.Warn("结束进程 " + process_name + " 失败: " + ex.Message);
+                        }
 
-                            completed++;
+                        completed++;
+                        if (on_progress != null)
+                        {
                             int percent = completed * 100 / total;
-                            progress_form.SetProgress(percent, $"正在关闭：{process_name}（{completed}/{total}）");
+                            on_progress(percent, $"正在关闭：{process_name}（{completed}/{total}）");
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    error_message = ex.Message;
-                    Logger.Error("关闭学生端失败", ex);
-                }
+            }
+            catch (Exception ex)
+            {
+                error_message = ex.Message;
+                Logger.Error("关闭学生端失败", ex);
+            }
 
-                this.BeginInvoke(new Action(() =>
-                {
-                    progress_form.SetProgress(100, "完成");
-                    progress_form.Close();
-                    progress_form.Dispose();
-                    this.button_1.Enabled = true;
-
-                    if (error_message == null)
-                    {
-                        Logger.Info("学生端相关进程已关闭");
-                        MessageBoxHelper.Show(this, "学生端相关进程已关闭", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        Logger.Error("关闭学生端失败: " + error_message);
-                        MessageBoxHelper.Show(this, "关闭学生端失败：\n" + error_message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }));
-            });
+            return error_message;
         }
 
         // 运行程序并等待结束，返回退出码（0 表示成功），同时输出 stdout/stderr
