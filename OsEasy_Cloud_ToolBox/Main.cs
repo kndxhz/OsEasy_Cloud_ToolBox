@@ -413,6 +413,9 @@ namespace OsEasy_Cloud_ToolBox
                 const int kill_rounds = 3;
                 int total = student_process_names.Length * kill_rounds;
                 int completed = 0;
+                int killed_count = 0;
+                int not_running_count = 0;
+                int failed_count = 0;
 
                 for (int round = 0; round < kill_rounds; round++)
                 {
@@ -421,15 +424,32 @@ namespace OsEasy_Cloud_ToolBox
                         try
                         {
                             string kill_output;
-                            run_and_wait(
+                            int exit_code = run_and_wait(
                                 Path.Combine(Environment.SystemDirectory, "taskkill.exe"),
                                 "/f /IM " + process_name,
                                 null,
-                                out kill_output);
+                                out kill_output,
+                                quiet: true);
+
+                            if (exit_code == 0)
+                            {
+                                killed_count++;
+                            }
+                            else if (exit_code == 128)
+                            {
+                                // 128: 该进程未运行，属正常情况，不计为失败
+                                not_running_count++;
+                            }
+                            else
+                            {
+                                failed_count++;
+                                Logger.Warn("结束进程 " + process_name + " 失败，taskkill 返回码=" + exit_code);
+                            }
                         }
                         catch (Exception ex)
                         {
                             // 单个进程结束失败不影响整体进度
+                            failed_count++;
                             Logger.Warn("结束进程 " + process_name + " 失败: " + ex.Message);
                         }
 
@@ -441,6 +461,8 @@ namespace OsEasy_Cloud_ToolBox
                         }
                     }
                 }
+
+                Logger.Info($"关闭学生端结束: {kill_rounds} 轮共结束 {killed_count} 个进程，未运行 {not_running_count} 个，失败 {failed_count} 个");
             }
             catch (Exception ex)
             {
@@ -451,8 +473,9 @@ namespace OsEasy_Cloud_ToolBox
             return error_message;
         }
 
-        // 运行程序并等待结束，返回退出码（0 表示成功），同时输出 stdout/stderr
-        private int run_and_wait(string file_name, string arguments, string working_directory, out string output)
+        // 运行程序并等待结束，返回退出码（0 表示成功），同时输出 stdout/stderr。
+        // quiet 为 true 时跳过逐次调用的详细日志（用于高频调用，如批量 taskkill）。
+        private int run_and_wait(string file_name, string arguments, string working_directory, out string output, bool quiet = false)
         {
             ProcessStartInfo process_start_info = new ProcessStartInfo
             {
@@ -467,7 +490,10 @@ namespace OsEasy_Cloud_ToolBox
 
             output = "";
             StringBuilder output_builder = new StringBuilder();
-            Logger.Info("启动外部程序: " + file_name + " " + arguments + "（工作目录: " + working_directory + "）");
+            if (!quiet)
+            {
+                Logger.Info("启动外部程序: " + file_name + " " + arguments + "（工作目录: " + working_directory + "）");
+            }
             try
             {
                 using (Process process = new Process())
@@ -487,7 +513,10 @@ namespace OsEasy_Cloud_ToolBox
                     process.WaitForExit();
                     output = output_builder.ToString().Trim();
                     int exit_code = process.ExitCode;
-                    Logger.LogProcessResult(file_name, arguments, exit_code, output);
+                    if (!quiet)
+                    {
+                        Logger.LogProcessResult(file_name, arguments, exit_code, output);
+                    }
                     return exit_code;
                 }
             }
