@@ -1,0 +1,271 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build Release
+    runs-on: windows-latest
+
+    steps:
+      # ========================================
+      # 1. Checkout
+      # ========================================
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # ========================================
+      # 2. 检查 Commit Message
+      # ========================================
+      - name: Check release commit
+        id: release
+        shell: pwsh
+        run: |
+          $commitMessage = @"
+          ${{ github.event.head_commit.message }}
+          "@
+
+          Write-Host "Commit message:"
+          Write-Host $commitMessage
+
+          # 匹配：
+          # release: v2.1.4.1
+          # release: v1.0.0.0
+          #
+          # 允许前后存在其他文字
+          $match = [regex]::Match(
+              $commitMessage,
+              '(?im)release:\s*v(\d+\.\d+\.\d+\.\d+)'
+          )
+
+          if (-not $match.Success) {
+              Write-Host "Commit 不包含 release: vx.x.x.x"
+              Write-Host "跳过 Release。"
+
+              "is_release=false" >> $env:GITHUB_OUTPUT
+              exit 0
+          }
+
+          $version = $match.Groups[1].Value
+          $tag = "v$version"
+
+          Write-Host "检测到 Release:"
+          Write-Host "Version = $version"
+          Write-Host "Tag     = $tag"
+
+          "is_release=true" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      # ========================================
+      # 3. 修改 AssemblyInfo.cs
+      # ========================================
+      - name: Update AssemblyInfo version
+        if: steps.release.outputs.is_release == 'true'
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          $file = "OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs"
+          $version = $env:VERSION
+
+          if (-not (Test-Path $file)) {
+              throw "找不到 $file"
+          }
+
+          Write-Host "修改版本号为 $version"
+
+          $content = Get-Content $file -Raw
+
+          $content = $content -replace `
+              '\[assembly:\s*AssemblyVersion\(".*?"\)\]', `
+              "[assembly: AssemblyVersion(`"$version`")]"
+
+          $content = $content -replace `
+              '\[assembly:\s*AssemblyFileVersion\(".*?"\)\]', `
+              "[assembly: AssemblyFileVersion(`"$version`")]"
+
+          Set-Content `
+              -Path $file `
+              -Value $content `
+              -Encoding UTF8
+
+          Write-Host ""
+          Write-Host "最终版本信息："
+
+          Select-String `
+              -Path $file `
+              -Pattern 'AssemblyVersion|AssemblyFileVersion'
+
+      # ========================================
+      # 4. 配置 MSBuild
+      # ========================================
+      - name: Setup MSBuild
+        if: steps.release.outputs.is_release == 'true'
+        uses: microsoft/setup-msbuild@v2
+
+      # ========================================
+      # 5. 构建 Release | Any CPU
+      # ========================================
+      - name: Build Release
+        if: steps.release.outputs.is_release == 'true'
+        shell: pwsh
+        run: |
+          msbuild `
+            OsEasy_Cloud_ToolBox.sln `
+            /m `
+            /p:Configuration=Release `
+            /p:Platform="Any CPU" `
+            /p:RestorePackages=false
+
+      # ========================================
+      # 6. 检查 EXE
+      # ========================================
+      - name: Locate executable
+        if: steps.release.outputs.is_release == 'true'
+        id: exe
+        shell: pwsh
+        run: |
+          $exe = "OsEasy_Cloud_ToolBox/bin/Release/OsEasy_Cloud_Tool_Box.exe"
+
+          if (-not (Test-Path $exe)) {
+              Write-Host "没有找到预期的 EXE，搜索整个 Release 目录："
+
+              Get-ChildItem `
+                "OsEasy_Cloud_ToolBox/bin/Release" `
+                -Filter "*.exe" `
+                -Recurse |
+                Select-Object FullName
+          }
+
+          if (-not (Test-Path $exe)) {
+              throw "找不到 OsEasy_Cloud_Tool_Box.exe"
+          }
+
+          Write-Host "找到 EXE:"
+          Write-Host $exe
+
+          "path=$exe" >> $env:GITHUB_OUTPUT
+
+      # ========================================
+      # 7. 获取上一个 Release Tag
+      # ========================================
+      - name: Find previous tag
+        if: steps.release.outputs.is_release == 'true'
+        id: previous
+        shell: pwsh
+        run: |
+          git fetch --tags --force
+
+          $currentTag = "${{ steps.release.outputs.tag }}"
+
+          $tags = @(
+              git tag --list "v*" --sort=-v:refname |
+              Where-Object {
+                  $_ -ne $currentTag
+              }
+          )
+
+          if ($tags.Count -gt 0) {
+              $previousTag = $tags[0]
+              Write-Host "上一个版本: $previousTag"
+
+              "tag=$previousTag" >> $env:GITHUB_OUTPUT
+          }
+          else {
+              Write-Host "没有找到历史 Release Tag"
+
+              "tag=" >> $env:GITHUB_OUTPUT
+          }
+
+      # ========================================
+      # 8. 提交 AssemblyInfo 版本修改
+      # ========================================
+      - name: Commit version change
+        if: steps.release.outputs.is_release == 'true'
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add OsEasy_Cloud_ToolBox/Properties/AssemblyInfo.cs
+
+          if (git diff --cached --quiet) {
+              Write-Host "AssemblyInfo 没有变化，不需要提交。"
+          }
+          else {
+              git commit -m "chore: set version $env:VERSION"
+              git push origin HEAD:${{ github.ref_name }}
+          }
+
+      # ========================================
+      # 9. 创建 Tag
+      # ========================================
+      - name: Create tag
+        if: steps.release.outputs.is_release == 'true'
+        shell: pwsh
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          # 防止重复 Release
+          if (git ls-remote --exit-code --tags origin "refs/tags/$env:TAG" *> $null) {
+              throw "Tag $env:TAG 已经存在，停止发布以避免覆盖已有 Release。"
+          }
+
+          git fetch --tags
+
+          # 当前 HEAD 已经包含 AssemblyInfo 版本修改
+          git tag -a "$env:TAG" -m "Release $env:TAG"
+          git push origin "$env:TAG"
+
+      # ========================================
+      # 10. 生成 Release Notes
+      # ========================================
+      - name: Generate release notes
+        if: steps.release.outputs.is_release == 'true'
+        id: notes
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          TAG: ${{ steps.release.outputs.tag }}
+          PREVIOUS_TAG: ${{ steps.previous.outputs.tag }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:PREVIOUS_TAG)) {
+              $notes = @"
+          **Full Changelog**: [v$env:VERSION](https://github.com/$env:REPOSITORY/commits/$env:TAG)
+          "@
+          }
+          else {
+              $notes = @"
+          **Full Changelog**: [$env:PREVIOUS_TAG...$env:TAG](https://github.com/$env:REPOSITORY/compare/$env:PREVIOUS_TAG...$env:TAG)
+          "@
+          }
+
+          $notes | Set-Content release-notes.md -Encoding UTF8
+
+          Write-Host $notes
+
+      # ========================================
+      # 11. 创建 GitHub Release + 上传 EXE
+      # ========================================
+      - name: Create GitHub Release
+        if: steps.release.outputs.is_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          name: ${{ steps.release.outputs.tag }}
+          body_path: release-notes.md
+          files: ${{ steps.exe.outputs.path }}
+          generate_release_notes: false
