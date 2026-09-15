@@ -29,7 +29,8 @@ using System.Runtime.InteropServices;
 //      生成号
 //      修订号
 //
-[assembly: AssemblyVersion("2.2.1.6")]
-[assembly: AssemblyFileVersion("2.2.1.6")]
+[assembly: AssemblyVersion("2.2.2.0")]
+[assembly: AssemblyFileVersion("2.2.2.0")]
 [assembly: NeutralResourcesLanguage("zh-Hans")]
+
 
