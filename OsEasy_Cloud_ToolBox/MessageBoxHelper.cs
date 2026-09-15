@@ -22,7 +22,7 @@ namespace OsEasy_Cloud_ToolBox
 
         // 在弹出模态窗口期间，持续为当前线程的顶层窗口设置反截屏属性。
         // 消息框、输入框本质都是独立顶层窗口，因此可以统一处理。
-        internal static T run_with_capture_protection<T>(Func<T> show_dialog)
+        private static T run_with_capture_protection<T>(Func<T> show_dialog)
         {
             if (show_dialog == null)
             {
@@ -67,54 +67,86 @@ namespace OsEasy_Cloud_ToolBox
             }, IntPtr.Zero);
         }
 
+        // 所有消息框的统一入口：记录日志、设置反截屏属性并返回用户选择
+        private static DialogResult show_message_box(
+            IWin32Window owner,
+            string text,
+            string caption,
+            MessageBoxButtons buttons,
+            MessageBoxIcon icon,
+            MessageBoxDefaultButton default_button)
+        {
+            Logger.Info("弹出消息框: [" + caption + "] " + text);
+
+            DialogResult result = run_with_capture_protection(() =>
+                owner != null
+                    ? MessageBox.Show(owner, text, caption, buttons, icon, default_button)
+                    : MessageBox.Show(text, caption, buttons, icon, default_button));
+
+            Logger.Info("消息框关闭: [" + caption + "] 用户选择=" + result);
+            return result;
+        }
+
         public static DialogResult Show(string text)
         {
-            return run_with_capture_protection(() => MessageBox.Show(text));
+            return show_message_box(null, text, "", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(string text, string caption)
         {
-            return run_with_capture_protection(() => MessageBox.Show(text, caption));
+            return show_message_box(null, text, caption, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(string text, string caption, MessageBoxButtons buttons)
         {
-            return run_with_capture_protection(() => MessageBox.Show(text, caption, buttons));
+            return show_message_box(null, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
         {
-            return run_with_capture_protection(() => MessageBox.Show(text, caption, buttons, icon));
+            return show_message_box(null, text, caption, buttons, icon, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton default_button)
         {
-            return run_with_capture_protection(() => MessageBox.Show(text, caption, buttons, icon, default_button));
+            return show_message_box(null, text, caption, buttons, icon, default_button);
         }
 
         public static DialogResult Show(IWin32Window owner, string text)
         {
-            return run_with_capture_protection(() => MessageBox.Show(owner, text));
+            return show_message_box(owner, text, "", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(IWin32Window owner, string text, string caption)
         {
-            return run_with_capture_protection(() => MessageBox.Show(owner, text, caption));
+            return show_message_box(owner, text, caption, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButtons buttons)
         {
-            return run_with_capture_protection(() => MessageBox.Show(owner, text, caption, buttons));
+            return show_message_box(owner, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
         {
-            return run_with_capture_protection(() => MessageBox.Show(owner, text, caption, buttons, icon));
+            return show_message_box(owner, text, caption, buttons, icon, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton default_button)
         {
-            return run_with_capture_protection(() => MessageBox.Show(owner, text, caption, buttons, icon, default_button));
+            return show_message_box(owner, text, caption, buttons, icon, default_button);
+        }
+
+        // 输入框封装：记录日志、设置反截屏属性并返回输入内容（取消时为空字符串）
+        public static string ShowInputBox(string prompt, string title, string default_response, int x_pos, int y_pos)
+        {
+            Logger.Info("弹出输入框: [" + title + "] " + prompt);
+
+            string result = run_with_capture_protection(
+                () => Microsoft.VisualBasic.Interaction.InputBox(prompt, title, default_response, x_pos, y_pos));
+
+            Logger.Info("输入框关闭: [" + title + "] 输入=" + (string.IsNullOrEmpty(result) ? "(空/已取消)" : result));
+            return result;
         }
     }
 }
