@@ -14,17 +14,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # ========================================
-      # 1. Checkout
-      # ========================================
       - name: Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      # ========================================
-      # 2. 检查 Commit Message
-      # ========================================
       - name: Check release commit
         id: release
         shell: pwsh
@@ -36,11 +30,6 @@ jobs:
           Write-Host "Commit message:"
           Write-Host $commitMessage
 
-          # 匹配：
-          # release: v2.1.4.1
-          # release: v1.0.0.0
-          #
-          # 允许 commit message 前后存在其他内容
           $match = [regex]::Match(
               $commitMessage,
               '(?im)release:\s*v(\d+\.\d+\.\d+\.\d+)'
@@ -65,9 +54,6 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag=$tag" >> $env:GITHUB_OUTPUT
 
-      # ========================================
-      # 3. 修改 AssemblyInfo.cs
-      # ========================================
       - name: Update AssemblyInfo version
         if: steps.release.outputs.is_release == 'true'
         shell: pwsh
@@ -85,12 +71,10 @@ jobs:
 
           $content = Get-Content $file -Raw
 
-          # AssemblyVersion
           $content = $content -replace `
               '\[assembly:\s*AssemblyVersion\(".*?"\)\]', `
               "[assembly: AssemblyVersion(`"$version`")]"
 
-          # AssemblyFileVersion
           $content = $content -replace `
               '\[assembly:\s*AssemblyFileVersion\(".*?"\)\]', `
               "[assembly: AssemblyFileVersion(`"$version`")]"
@@ -107,38 +91,32 @@ jobs:
               -Path $file `
               -Pattern 'AssemblyVersion|AssemblyFileVersion'
 
-      # ========================================
-      # 4. 设置 MSBuild
-      # ========================================
       - name: Setup MSBuild
         if: steps.release.outputs.is_release == 'true'
         uses: microsoft/setup-msbuild@v3
 
-      # ========================================
-      # 5. 构建 Release | AnyCPU
-      # ========================================
       - name: Build Release
         if: steps.release.outputs.is_release == 'true'
         shell: pwsh
         run: |
           Write-Host "开始构建 Release | Any CPU..."
-      
-          msbuild `
-            "OsEasy_Cloud_ToolBox.sln" `
-            /m `
-            "/p:Configuration=Release" `
-            "/p:Platform=Any CPU"
-      
+
+          $msbuildArgs = @(
+              "OsEasy_Cloud_ToolBox.sln"
+              "/m"
+              "/p:Configuration=Release"
+              "/p:Platform=Any CPU"
+          )
+
+          & msbuild @msbuildArgs
+
           if ($LASTEXITCODE -ne 0) {
               throw "MSBuild 构建失败"
           }
-      
+
           Write-Host ""
           Write-Host "MSBuild 构建成功。"
 
-      # ========================================
-      # 6. 查找 EXE
-      # ========================================
       - name: Locate executable
         if: steps.release.outputs.is_release == 'true'
         id: exe
@@ -160,9 +138,6 @@ jobs:
               -File |
               Select-Object FullName, Length
 
-          # ========================================
-          # 查找 EXE
-          # ========================================
           $exes = @(
               Get-ChildItem `
                   $releaseDir `
@@ -182,7 +157,7 @@ jobs:
               } |
               Select-Object -First 1
 
-          # 如果没有找到指定名称，则使用第一个 EXE
+          # 如果没找到，则使用第一个 EXE
           if (-not $exe) {
               Write-Host ""
               Write-Host "未找到 OsEasy_Cloud_ToolBox.exe"
@@ -202,9 +177,66 @@ jobs:
 
           "path=$($exe.FullName)" >> $env:GITHUB_OUTPUT
 
-      # ========================================
-      # 7. 获取上一个版本 Tag
-      # ========================================
+      # ============================================================
+      # 上传 EXE 到 S3
+      # ============================================================
+      - name: Upload EXE to S3
+        if: steps.release.outputs.is_release == 'true'
+        shell: pwsh
+        env:
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          EXE_PATH: ${{ steps.exe.outputs.path }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:S3_ENDPOINT)) {
+              throw "GitHub Secret S3_ENDPOINT 未配置"
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:S3_BUCKET)) {
+              throw "GitHub Secret S3_BUCKET 未配置"
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:AWS_ACCESS_KEY_ID)) {
+              throw "GitHub Secret S3_ACCESS_KEY 未配置"
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:AWS_SECRET_ACCESS_KEY)) {
+              throw "GitHub Secret S3_SECRET_KEY 未配置"
+          }
+
+          if (-not (Test-Path $env:EXE_PATH)) {
+              throw "EXE 不存在：$env:EXE_PATH"
+          }
+
+          Write-Host "AWS CLI："
+          aws --version
+
+          $objectKey = "OsEasy_Cloud_ToolBox.exe"
+          $s3Uri = "s3://$env:S3_BUCKET/$objectKey"
+
+          Write-Host ""
+          Write-Host "开始上传 EXE 到 S3..."
+          Write-Host "Endpoint: $env:S3_ENDPOINT"
+          Write-Host "Bucket:   $env:S3_BUCKET"
+          Write-Host "Object:   $objectKey"
+          Write-Host "File:     $env:EXE_PATH"
+
+          aws s3 cp `
+              "$env:EXE_PATH" `
+              "$s3Uri" `
+              --endpoint-url "$env:S3_ENDPOINT" `
+              --only-show-errors
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "S3 上传失败"
+          }
+
+          Write-Host ""
+          Write-Host "S3 上传成功：$s3Uri"
+
       - name: Find previous tag
         if: steps.release.outputs.is_release == 'true'
         id: previous
@@ -214,7 +246,6 @@ jobs:
 
           $currentTag = "${{ steps.release.outputs.tag }}"
 
-          # 获取所有 vX.X.X.X 格式的 Tag
           $tags = @(
               git tag --list "v*" --sort=-v:refname |
               Where-Object {
@@ -231,14 +262,11 @@ jobs:
               "tag=$previousTag" >> $env:GITHUB_OUTPUT
           }
           else {
-              Write-Host "没有找到历史版本 Tag。"
+              Write-Host "没有找到历史版本 Tag."
 
               "tag=" >> $env:GITHUB_OUTPUT
           }
 
-      # ========================================
-      # 8. 提交 AssemblyInfo 版本修改
-      # ========================================
       - name: Commit version change
         if: steps.release.outputs.is_release == 'true'
         shell: pwsh
@@ -271,16 +299,12 @@ jobs:
               Write-Host "chore: set version $env:VERSION"
           }
 
-      # ========================================
-      # 9. 创建 Git Tag
-      # ========================================
       - name: Create tag
         if: steps.release.outputs.is_release == 'true'
         shell: pwsh
         env:
           TAG: ${{ steps.release.outputs.tag }}
         run: |
-          # 检查 Tag 是否已经存在
           git fetch --tags --force
 
           $existingTag = git tag --list "$env:TAG"
@@ -305,9 +329,6 @@ jobs:
 
           Write-Host "Tag 创建成功：$env:TAG"
 
-      # ========================================
-      # 10. 生成 Release Notes
-      # ========================================
       - name: Generate release notes
         if: steps.release.outputs.is_release == 'true'
         shell: pwsh
@@ -340,9 +361,6 @@ jobs:
           Write-Host "Release Notes："
           Write-Host $notes
 
-      # ========================================
-      # 11. 创建 GitHub Release + 上传 EXE
-      # ========================================
       - name: Create GitHub Release
         if: steps.release.outputs.is_release == 'true'
         uses: softprops/action-gh-release@v3
@@ -352,3 +370,4 @@ jobs:
           body_path: release-notes.md
           files: ${{ steps.exe.outputs.path }}
           generate_release_notes: false
+
