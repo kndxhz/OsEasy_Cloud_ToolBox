@@ -330,6 +330,7 @@ jobs:
           Write-Host "Tag 创建成功：$env:TAG"
 
       - name: Generate release notes
+        id: notes
         if: steps.release.outputs.is_release == 'true'
         shell: pwsh
         env:
@@ -338,151 +339,77 @@ jobs:
           PREVIOUS_TAG: ${{ steps.previous.outputs.tag }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          Write-Host "生成 Release Notes..."
-
           $currentTag = $env:TAG
           $previousTag = $env:PREVIOUS_TAG
+          $repository = $env:REPOSITORY
 
-          # ============================================================
-          # 获取提交记录
-          # 最新提交在前，最旧提交在后
-          # ============================================================
+          Write-Host "生成 Release Notes..."
+          Write-Host "当前 Tag：$currentTag"
+          Write-Host "上一 Tag：$(if ($previousTag) { $previousTag } else { '(无)' })"
 
-          if ([string]::IsNullOrWhiteSpace($previousTag)) {
-              Write-Host "没有历史 Tag，获取当前 Tag 的全部提交。"
-
-              $commits = @(
-                  git log `
-                      $currentTag `
-                      --pretty=format:"%H`t%h`t%an`t%ae`t%s"
-              )
-          }
-          else {
-              Write-Host "获取 $previousTag 到 $currentTag 之间的提交。"
-
-              $commits = @(
-                  git log `
-                      "$previousTag..$currentTag" `
-                      --pretty=format:"%H`t%h`t%an`t%ae`t%s"
-              )
+          if ($previousTag) {
+              $logRange = "$previousTag..$currentTag"
+          } else {
+              $logRange = $currentTag
           }
 
-          # ============================================================
-          # 生成提交列表
-          # ============================================================
+          # 按提交时间倒序：最新提交在前
+          $commits = @(git log $logRange --pretty=format:"%H%x09%s")
 
-          $commitLines = @()
+          $lines = @()
 
           foreach ($commit in $commits) {
               if ([string]::IsNullOrWhiteSpace($commit)) {
                   continue
               }
 
-              $parts = $commit -split "`t", 5
+              $parts = $commit -split "`t", 2
 
-              if ($parts.Count -lt 5) {
+              if ($parts.Count -lt 2) {
                   continue
               }
 
               $fullHash = $parts[0]
-              $shortHash = $parts[1]
-              $authorName = $parts[2]
-              $authorEmail = $parts[3]
-              $subject = $parts[4]
+              $subject = $parts[1]
 
+              # 隐藏 GitHub Actions 自动生成的版本号 Commit
               if ($subject -match '^chore:\s*set version\s+\d+\.\d+\.\d+\.\d+$') {
                   Write-Host "隐藏自动版本 Commit：$fullHash $subject"
                   continue
               }
 
-              # ========================================================
-              # 获取 GitHub 用户名
-              # ========================================================
+              $shortHash = $fullHash.Substring(0, 7)
+              $commitUrl = "https://github.com/$repository/commit/$fullHash"
 
-              $githubUsername = $null
-
-              try {
-                  $apiUrl = "https://api.github.com/repos/$env:REPOSITORY/commits/$fullHash"
-
-                  $response = Invoke-RestMethod `
-                      -Uri $apiUrl `
-                      -Headers @{
-                          "Accept" = "application/vnd.github+json"
-                          "User-Agent" = "github-actions"
-                      }
-
-                  if ($response.author -and $response.author.login) {
-                      $githubUsername = $response.author.login
-                  }
-              }
-              catch {
-                  Write-Host "无法获取 GitHub 用户信息：$fullHash"
-              }
-
-              # ========================================================
-              # 作者显示
-              # ========================================================
-
-              if ([string]::IsNullOrWhiteSpace($githubUsername)) {
-                  $displayName = $authorName
-                  $authorUrl = "https://github.com/$env:REPOSITORY"
-              }
-              else {
-                  $displayName = "@$githubUsername"
-                  $authorUrl = "https://github.com/$githubUsername"
-              }
-
-              $commitUrl = "https://github.com/$env:REPOSITORY/commit/$fullHash"
-
-              # ========================================================
-              # Release Notes 格式
-              #
-              # - fix: 修复了xxx（@user，a1b2c3d）
-              # ========================================================
-
-              $line = "- $subject（[$displayName]($authorUrl)，[$shortHash]($commitUrl)）"
-
-              $commitLines += $line
+              $lines += "- $subject（[$shortHash]($commitUrl)）"
           }
 
-          # ============================================================
+          if ($lines.Count -eq 0) {
+              $lines += "- 无可展示的提交记录"
+          }
+
           # Full Changelog
-          # ============================================================
-
-          if ([string]::IsNullOrWhiteSpace($previousTag)) {
-              $changelogUrl = "https://github.com/$env:REPOSITORY/commits/$currentTag"
-          }
-          else {
-              $changelogUrl = "https://github.com/$env:REPOSITORY/compare/$previousTag...$currentTag"
+          if ($previousTag) {
+              $compareUrl = "https://github.com/$repository/compare/$previousTag...$currentTag"
+          } else {
+              $compareUrl = "https://github.com/$repository/commits/$currentTag"
           }
 
-          # ============================================================
-          # 组合 Release Notes
-          # ============================================================
+          $lines += ""
+          $lines += "**Full Changelog**: [$previousTag...$currentTag]($compareUrl)"
 
-          $notes = @()
-
-          if ($commitLines.Count -gt 0) {
-              $notes += $commitLines
-              $notes += ""
-          }
-
-          if ([string]::IsNullOrWhiteSpace($previousTag)) {
-              $notes += "**Full Changelog**: [$currentTag]($changelogUrl)"
-          }
-          else {
-              $notes += "**Full Changelog**: [$previousTag...$currentTag]($changelogUrl)"
-          }
-
-          $notesText = $notes -join "`n"
-
-          $notesText | Set-Content `
-              -Path release-notes.md `
-              -Encoding UTF8
+          $releaseNotes = $lines -join "`n"
 
           Write-Host ""
-          Write-Host "Release Notes："
-          Write-Host $notesText
+          Write-Host "========== Release Notes =========="
+          Write-Host $releaseNotes
+          Write-Host "==================================="
+          Write-Host ""
+
+          # 写入 GitHub Actions Output
+          "body<<EOF" >> $env:GITHUB_OUTPUT
+          $releaseNotes >> $env:GITHUB_OUTPUT
+          "EOF" >> $env:GITHUB_OUTPUT
 
       - name: Create GitHub Release
         if: steps.release.outputs.is_release == 'true'
@@ -490,7 +417,6 @@ jobs:
         with:
           tag_name: ${{ steps.release.outputs.tag }}
           name: ${{ steps.release.outputs.tag }}
-          body_path: release-notes.md
+          body: ${{ steps.notes.outputs.body }}
           files: ${{ steps.exe.outputs.path }}
-          generate_release_notes: false
 
