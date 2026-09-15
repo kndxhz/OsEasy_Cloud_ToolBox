@@ -586,10 +586,8 @@ namespace OsEasy_Cloud_ToolBox
                     {
                         string manual_ip_input = MessageBoxHelper.run_with_capture_protection(
                             () => Microsoft.VisualBasic.Interaction.InputBox("请输入教师机IP地址:", "输入IP地址", "", -1, -1));
-                        if (!string.IsNullOrEmpty(manual_ip_input))
-                        {
-                            teacher_ip = manual_ip_input;
-                        }
+                        // 取消输入（返回空字符串）时清空 IP，使后续流程按“已取消”处理
+                        teacher_ip = string.IsNullOrEmpty(manual_ip_input) ? null : manual_ip_input;
                     }
                 }
                 Logger.Info("解禁网络: 教师机IP=" + teacher_ip + "，获取方式=" + teacher_ip_source);
