@@ -33,7 +33,7 @@
 
 # 致谢
 
-- [OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)</br>为本程序提供了更多的丰富功能，真的特别感谢 @ZiHaoSaMa66 ，因为自己懒得再写一套就直接下载现成的了
+- [OsEasy-ToolBox](https://github.com/ZiHaoSaMa66/OsEasy-ToolBox)</br>为本程序提供了很多思路，尤其是在v2.2.0.0版本之前，一直使用的是这个仓库的关学生端的bat，真的特别感谢 @ZiHaoSaMa66
 
 # 协议
 
