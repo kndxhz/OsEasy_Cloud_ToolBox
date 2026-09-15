@@ -121,13 +121,13 @@ jobs:
         if: steps.release.outputs.is_release == 'true'
         shell: pwsh
         run: |
-          Write-Host "开始构建 Release | AnyCPU..."
+          Write-Host "开始构建 Release | Any CPU..."
 
           msbuild `
             OsEasy_Cloud_ToolBox.sln `
             /m `
             /p:Configuration=Release `
-            /p:Platform=AnyCPU
+            /p:Platform=Any CPU
 
           if ($LASTEXITCODE -ne 0) {
               throw "MSBuild 构建失败"
