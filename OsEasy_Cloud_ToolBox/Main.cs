@@ -37,6 +37,7 @@ namespace OsEasy_Cloud_ToolBox
         private System.Windows.Forms.Timer typing_timer;
         private System.Windows.Forms.Timer process_check_timer;
         private int process_check_running = 0;
+        private string last_student_status = null; // 上一次检测到的学生端状态，用于状态变化时输出日志
         public static bool student_process_suspended = false; // 记录学生端是否被挂起
 
         public static bool toolbox_is_hidden = true; // 记录工具箱是否被隐藏
@@ -296,11 +297,13 @@ namespace OsEasy_Cloud_ToolBox
                     this.BeginInvoke(new Action(() =>
                     {
                         this.Text = status;
-                        // 更新静态状态，供 More 使用
-                        if (student_process_suspended != detected_suspended)
+                        // 状态发生变化时输出日志
+                        if (status != last_student_status)
                         {
-                            Logger.Info("学生端挂起状态变化: " + detected_suspended);
+                            Logger.Info("学生端状态变化: " + (last_student_status ?? "(未知)") + " -> " + status);
+                            last_student_status = status;
                         }
+                        // 更新静态状态，供 More 使用
                         student_process_suspended = detected_suspended;
 
                         // 如果 More 窗体已打开，更新其按钮文本
