@@ -3,6 +3,18 @@
 ![OsEasy_Cloud_ToolBox](https://socialify.git.ci/kndxhz/OsEasy_Cloud_ToolBox/image?description=1&descriptionEditable=%E9%80%82%E7%94%A8%E4%BA%8E%E5%99%A2%E6%98%93%E4%BA%91%E6%9C%BA%E6%88%BF%E7%9A%84%E6%9C%BA%E6%88%BF%E8%A7%A3%E6%8E%A7%E8%BD%AF%E4%BB%B6&font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/kndxhz/OsEasy_Cloud_ToolBox/total?style=for-the-badge)
 
+
+> [!warning]
+> 本项目已进入EOL（End-of-life，产品寿命结束）倒计时  
+> **最晚将于2027年3月停止更新**  
+> 因为我即将从使用了噢易云机房的学校毕业  
+> 在本项目 EOL 之后，**我仍会接受 PR 并 review**（但是因为没有实验环境了，所以只能肉眼 review ，有任何 bug 欢迎发 issue ）  
+> 在你 PR 多了之后，我会给予 Contributor 权限
+> 
+> 在 EOL 之前，本项目仍然接受新功能请求  
+> 感谢使用！  
+> 希望此项目在 PR 的帮助下继续发光发热，为更多学弟学妹提供更好的服务
+
 # 简介
 
 这是一个适用于噢易云机房的解控软件</br>
