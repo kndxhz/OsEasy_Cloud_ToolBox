@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -48,6 +48,9 @@ namespace OsEasy_Cloud_ToolBox
 
         [DllImport("user32.dll")]
         private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
+
+        // SetWindowDisplayAffinity 不可用时，使用黑屏遮罩作为降级方案。
+        private static Form black_screen_overlay;
 
         // 关学生端需要结束的进程列表
         private string[] student_process_names = new string[]
@@ -192,9 +195,10 @@ namespace OsEasy_Cloud_ToolBox
             }
         }
 
-        // 将显示关联应用到本程序的所有窗口（含“更多工具”窗口）
-        public static void set_all_windows_display_affinity(uint affinity)
+        // 将显示关联应用到本程序的所有窗口（含“更多工具”窗口），返回是否全部成功。
+        public static bool set_all_windows_display_affinity(uint affinity)
         {
+            bool all_succeeded = true;
             foreach (Form form in Application.OpenForms)
             {
                 if (form == null || !form.IsHandleCreated)
@@ -203,33 +207,100 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 if (!apply_display_affinity(form.Handle, affinity))
                 {
+                    all_succeeded = false;
                     Logger.Warn("设置窗口显示关联失败: " + form.GetType().Name + " affinity=0x" + affinity.ToString("X8"));
                 }
             }
+            return all_succeeded;
+        }
+
+        private static bool show_black_screen_fallback()
+        {
+            try
+            {
+                if (black_screen_overlay == null || black_screen_overlay.IsDisposed)
+                {
+                    black_screen_overlay = new Form
+                    {
+                        FormBorderStyle = FormBorderStyle.None,
+                        StartPosition = FormStartPosition.Manual,
+                        BackColor = System.Drawing.Color.Black,
+                        ShowInTaskbar = false,
+                        TopMost = true,
+                        Bounds = System.Windows.Forms.Screen.PrimaryScreen.Bounds
+                    };
+                }
+
+                black_screen_overlay.Bounds = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+                black_screen_overlay.Show();
+                black_screen_overlay.BringToFront();
+                Logger.Warn("隐藏窗口 API 不受支持，已回退到黑屏遮罩");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("创建黑屏遮罩失败", ex);
+                return false;
+            }
+        }
+
+        private static void close_black_screen_fallback()
+        {
+            if (black_screen_overlay == null || black_screen_overlay.IsDisposed)
+            {
+                return;
+            }
+
+            black_screen_overlay.Hide();
         }
 
         public void hide_toolbox()
         {
-            //this.Hide();
-            toolbox_is_hidden = true;
-            set_all_windows_display_affinity(WDA_EXCLUDEFROMCAPTURE);
+            bool api_succeeded = set_all_windows_display_affinity(WDA_EXCLUDEFROMCAPTURE);
+            bool fallback_succeeded = api_succeeded || show_black_screen_fallback();
+
+            if (!fallback_succeeded)
+            {
+                toolbox_is_hidden = false;
+                MessageBoxHelper.Show(
+                    this,
+                    "隐藏窗口失败：当前 Windows API 不受支持，且黑屏降级也无法启用。",
+                    "隐藏失败",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                Logger.Error("隐藏工具箱失败：API 和黑屏降级均不可用");
+            }
+            else
+            {
+                toolbox_is_hidden = true;
+                Logger.Info(api_succeeded ? "隐藏工具箱（排除屏幕捕获）" : "隐藏工具箱（黑屏降级）");
+            }
+
             if (more_form_instance != null && !more_form_instance.IsDisposed)
             {
                 more_form_instance.UpdateHideButton();
             }
-            Logger.Info("隐藏工具箱（排除屏幕捕获）");
         }
 
         public void show_toolbox()
         {
-            //this.Show();
+            close_black_screen_fallback();
+            bool api_succeeded = set_all_windows_display_affinity(WDA_NONE);
             toolbox_is_hidden = false;
-            set_all_windows_display_affinity(WDA_NONE);
+
+            if (!api_succeeded)
+            {
+                Logger.Warn("恢复窗口显示关联失败，窗口已退出黑屏降级");
+            }
+            else
+            {
+                Logger.Info("显示工具箱（恢复屏幕捕获）");
+            }
+
             if (more_form_instance != null && !more_form_instance.IsDisposed)
             {
                 more_form_instance.UpdateHideButton();
             }
-            Logger.Info("显示工具箱（恢复屏幕捕获）");
         }
 
         private void process_check_timer_tick(object sender, EventArgs e)

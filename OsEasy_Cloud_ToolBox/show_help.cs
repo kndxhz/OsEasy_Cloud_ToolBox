@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace OsEasy_Cloud_ToolBox
@@ -66,7 +66,7 @@ namespace OsEasy_Cloud_ToolBox
                 "button_4",
                 new HelpInfo(
                     "显示/隐藏本程序",
-                    "可以让教师端看不到本程序\n（如果系统版本小于Windows 10 2004则看本程序是黑屏）"
+                    "优先使用 Windows API 隐藏本程序，避免教师端屏幕捕获看到窗口。\n如果当前系统不支持该 API，会回退到黑屏遮罩。\n如果 API 和黑屏遮罩都无法启用，会弹出警告并取消隐藏。"
                 )
             }
         };
