@@ -68,8 +68,7 @@ namespace OsEasy_Cloud_ToolBox
 
             // 同步工具箱隐藏状态，并应用到本窗口
             this.UpdateHideButton();
-            Main.set_all_windows_display_affinity(
-                Main.toolbox_is_hidden ? Main.WDA_EXCLUDEFROMCAPTURE : Main.WDA_NONE);
+            Main.set_all_windows_display_affinity(Main.get_current_hide_affinity());
         }
 
         private void more_form_closing(object sender, FormClosingEventArgs e)
@@ -346,7 +345,7 @@ namespace OsEasy_Cloud_ToolBox
                 else
                 {
                     Main.toolbox_is_hidden = false;
-                    Main.set_all_windows_display_affinity(Main.WDA_NONE);
+                    Main.show_windows_from_capture();
                 }
             }
             else
@@ -357,8 +356,12 @@ namespace OsEasy_Cloud_ToolBox
                 }
                 else
                 {
-                    Main.toolbox_is_hidden = true;
-                    Main.set_all_windows_display_affinity(Main.WDA_EXCLUDEFROMCAPTURE);
+                    bool hidden = Main.hide_windows_from_capture() != Main.WDA_NONE;
+                    Main.toolbox_is_hidden = hidden;
+                    if (!hidden)
+                    {
+                        Logger.Warn("更多工具: 当前系统不支持反截屏，保持窗口可见");
+                    }
                 }
             }
 

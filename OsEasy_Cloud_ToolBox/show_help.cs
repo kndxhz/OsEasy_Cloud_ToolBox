@@ -66,7 +66,7 @@ namespace OsEasy_Cloud_ToolBox
                 "button_4",
                 new HelpInfo(
                     "显示/隐藏本程序",
-                    "优先使用 Windows API 隐藏本程序，避免教师端屏幕捕获看到窗口。\n如果当前系统不支持该 API，会回退到黑屏遮罩。\n如果 API 和黑屏遮罩都无法启用，会弹出警告并取消隐藏。"
+                    "使用 Windows API 隐藏本程序，避免教师端屏幕捕获看到窗口。\nWindows 10 2004 及以上捕获时窗口完全消失；\nWindows 7 等旧系统会回退到捕获时显示为黑块（窗口在本地仍可正常使用）。\n如果当前系统不支持这些 API，会弹出警告并取消隐藏。"
                 )
             }
         };

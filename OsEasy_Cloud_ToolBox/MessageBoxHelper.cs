@@ -55,9 +55,8 @@ namespace OsEasy_Cloud_ToolBox
         // 将反截屏属性应用到当前线程的所有顶层窗口
         private static void apply_affinity_to_thread_windows()
         {
-            uint affinity = Main.toolbox_is_hidden
-                ? Main.WDA_EXCLUDEFROMCAPTURE
-                : Main.WDA_NONE;
+            // 使用当前实际生效的隐藏方式（Win7 上为 WDA_MONITOR）
+            uint affinity = Main.get_current_hide_affinity();
 
             uint thread_id = GetCurrentThreadId();
             EnumThreadWindows(thread_id, (h_wnd, l_param) =>

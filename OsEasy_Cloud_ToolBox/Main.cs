@@ -44,13 +44,17 @@ namespace OsEasy_Cloud_ToolBox
 
         // SetWindowDisplayAffinity 相关常量
         public const uint WDA_NONE = 0x00000000;
+        // Windows 7 起支持：窗口在本地正常可见，但在屏幕捕获中内容显示为黑块
+        public const uint WDA_MONITOR = 0x00000001;
+        // Windows 10 2004 起支持：窗口在屏幕捕获中完全不可见
         public const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
 
         [DllImport("user32.dll")]
         private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
 
-        // SetWindowDisplayAffinity 不可用时，使用黑屏遮罩作为降级方案。
-        private static Form black_screen_overlay;
+        // 当前实际生效的隐藏方式（WDA_EXCLUDEFROMCAPTURE 或 WDA_MONITOR）。
+        // 供隐藏期间新建的消息框、进度框等窗口沿用，避免在 Win7 上继续使用不受支持的 API。
+        public static uint active_hide_affinity = WDA_NONE;
 
         // 关学生端需要结束的进程列表
         private string[] student_process_names = new string[]
@@ -214,66 +218,69 @@ namespace OsEasy_Cloud_ToolBox
             return all_succeeded;
         }
 
-        private static bool show_black_screen_fallback()
+        // 尝试让所有窗口对屏幕捕获隐藏。
+        // 优先使用 WDA_EXCLUDEFROMCAPTURE（Windows 10 2004+，捕获时窗口完全消失），
+        // 失败则回退到 WDA_MONITOR（Windows 7 起支持，捕获时窗口内容显示为黑块）。
+        // 这里不再使用全屏黑色遮罩：全屏遮罩会连同本地屏幕一起挡住，导致程序无法操作。
+        // 返回最终生效的 affinity；WDA_NONE 表示当前系统两种方式均不支持。
+        public static uint hide_windows_from_capture()
         {
-            try
+            uint affinity = WDA_EXCLUDEFROMCAPTURE;
+            if (!set_all_windows_display_affinity(affinity))
             {
-                if (black_screen_overlay == null || black_screen_overlay.IsDisposed)
+                Logger.Warn("当前系统不支持 WDA_EXCLUDEFROMCAPTURE，尝试回退到 WDA_MONITOR");
+                affinity = WDA_MONITOR;
+                if (!set_all_windows_display_affinity(affinity))
                 {
-                    black_screen_overlay = new Form
-                    {
-                        FormBorderStyle = FormBorderStyle.None,
-                        StartPosition = FormStartPosition.Manual,
-                        BackColor = System.Drawing.Color.Black,
-                        ShowInTaskbar = false,
-                        TopMost = true,
-                        Bounds = System.Windows.Forms.Screen.PrimaryScreen.Bounds
-                    };
+                    active_hide_affinity = WDA_NONE;
+                    Logger.Warn("WDA_MONITOR 同样不可用，无法启用反截屏");
+                    return WDA_NONE;
                 }
+            }
 
-                black_screen_overlay.Bounds = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-                black_screen_overlay.Show();
-                black_screen_overlay.BringToFront();
-                Logger.Warn("隐藏窗口 API 不受支持，已回退到黑屏遮罩");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("创建黑屏遮罩失败", ex);
-                return false;
-            }
+            active_hide_affinity = affinity;
+            return affinity;
         }
 
-        private static void close_black_screen_fallback()
+        // 取消反截屏，恢复窗口的正常显示与屏幕捕获。
+        public static bool show_windows_from_capture()
         {
-            if (black_screen_overlay == null || black_screen_overlay.IsDisposed)
+            active_hide_affinity = WDA_NONE;
+            return set_all_windows_display_affinity(WDA_NONE);
+        }
+
+        // 当前应使用的反截屏 affinity，供隐藏期间新建的窗口（消息框、进度框等）沿用。
+        public static uint get_current_hide_affinity()
+        {
+            if (!toolbox_is_hidden)
             {
-                return;
+                return WDA_NONE;
             }
 
-            black_screen_overlay.Hide();
+            return active_hide_affinity != WDA_NONE ? active_hide_affinity : WDA_EXCLUDEFROMCAPTURE;
         }
 
         public void hide_toolbox()
         {
-            bool api_succeeded = set_all_windows_display_affinity(WDA_EXCLUDEFROMCAPTURE);
-            bool fallback_succeeded = api_succeeded || show_black_screen_fallback();
+            uint affinity = hide_windows_from_capture();
 
-            if (!fallback_succeeded)
+            if (affinity == WDA_NONE)
             {
                 toolbox_is_hidden = false;
                 MessageBoxHelper.Show(
                     this,
-                    "隐藏窗口失败：当前 Windows API 不受支持，且黑屏降级也无法启用。",
+                    "隐藏窗口失败：当前系统不支持反截屏 API（需要 Windows 7 及以上并启用桌面窗口管理器）。",
                     "隐藏失败",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
-                Logger.Error("隐藏工具箱失败：API 和黑屏降级均不可用");
+                Logger.Error("隐藏工具箱失败：反截屏 API 不可用");
             }
             else
             {
                 toolbox_is_hidden = true;
-                Logger.Info(api_succeeded ? "隐藏工具箱（排除屏幕捕获）" : "隐藏工具箱（黑屏降级）");
+                Logger.Info(affinity == WDA_EXCLUDEFROMCAPTURE
+                    ? "隐藏工具箱（排除屏幕捕获）"
+                    : "隐藏工具箱（捕获时显示为黑块，WDA_MONITOR 降级）");
             }
 
             if (more_form_instance != null && !more_form_instance.IsDisposed)
@@ -284,13 +291,12 @@ namespace OsEasy_Cloud_ToolBox
 
         public void show_toolbox()
         {
-            close_black_screen_fallback();
-            bool api_succeeded = set_all_windows_display_affinity(WDA_NONE);
+            bool api_succeeded = show_windows_from_capture();
             toolbox_is_hidden = false;
 
             if (!api_succeeded)
             {
-                Logger.Warn("恢复窗口显示关联失败，窗口已退出黑屏降级");
+                Logger.Warn("恢复窗口显示关联失败");
             }
             else
             {
@@ -447,8 +453,7 @@ namespace OsEasy_Cloud_ToolBox
             // 弹出进度条，异步循环三次结束学生端相关进程
             ProgressForm progress_form = new ProgressForm("正在关闭学生端", "正在准备...");
             progress_form.Show(this);
-            set_all_windows_display_affinity(
-                toolbox_is_hidden ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+            set_all_windows_display_affinity(get_current_hide_affinity());
 
             string error_message = await Task.Run(() => close_student_processes_sync(
                 (percent, text) => progress_form.SetProgress(percent, text)));
